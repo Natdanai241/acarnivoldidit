@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A CARNIVORE DID IT! — สืบจากสัตว์ | ZPD Case Files</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;padding:0}
+:root{
+  --navy:#060b16; --navy2:#0b1426; --navy3:#121e33;
+  --glass:rgba(22,36,62,.72); --glass2:rgba(16,27,48,.86);
+  --stroke:rgba(150,190,240,.16); --stroke2:rgba(255,181,69,.34);
+  --amber:#ffb545; --amber2:#ffd98a; --amber3:#c77f16;
+  --teal:#2ed3c3; --tealD:#0f6f68; --violet:#8b7cf6;
+  --rose:#ff6b6b; --roseD:#7a2222; --mint:#5ee2a0; --mintD:#1c6b45;
+  --ink:#e9f0fc; --dim:#93a7c8; --paper:#f4eddd; --paperInk:#2b2417;
+  --fs:clamp(12px,1.02vh + .48vw,16px);
+  --r:16px;
+  --sh1:0 1px 0 rgba(255,255,255,.07) inset;
+  --sh2:0 18px 40px -18px rgba(0,0,0,.9),0 4px 14px -6px rgba(0,0,0,.6);
+}
+body{
+  background:var(--navy);
+  color:var(--ink);
+  font-family:"Trebuchet MS","Noto Sans Thai",Tahoma,system-ui,-apple-system,sans-serif;
+  overflow:hidden;font-size:var(--fs);line-height:1.35}
+[hidden]{display:none!important}
+button,input,textarea,select{font-family:inherit;color:inherit;font-size:1em}
+button{cursor:pointer}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(150,190,240,.22);border-radius:99px}
+
+/* ---------------- ERROR PANEL ---------------- */
+#errorPanel{position:fixed;inset:auto 0 0 0;z-index:99999;background:linear-gradient(180deg,#5c1013,#3d0a0c);
+  border-top:3px solid #ff5f52;color:#ffdad5;padding:10px 14px;font-size:12.5px;max-height:44vh;overflow:auto;
+  box-shadow:0 -14px 40px rgba(0,0,0,.7)}
+#errorPanel b{color:#fff}
+#errorPanel pre{white-space:pre-wrap;margin:6px 0 0;font-size:11px;opacity:.85;font-family:ui-monospace,monospace}
+#errClose{position:absolute;top:6px;right:8px;background:rgba(0,0,0,.35);border:1px solid #ff8a7a;border-radius:8px;
+  color:#ffdad5;padding:2px 9px;font-size:12px}
+
+/* ---------------- ATMOSPHERE ---------------- */
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+   radial-gradient(1100px 620px at 15% -8%,rgba(46,211,195,.14),transparent 62%),
+   radial-gradient(900px 560px at 88% 4%,rgba(255,181,69,.13),transparent 60%),
+   radial-gradient(1000px 700px at 50% 118%,rgba(139,124,246,.14),transparent 62%),
+   linear-gradient(170deg,#07101f 0%,#060b16 45%,#040811 100%)}
+#bg .grid{position:absolute;inset:-2px;opacity:.28;
+  background-image:linear-gradient(rgba(150,190,240,.055) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(150,190,240,.055) 1px,transparent 1px);
+  background-size:46px 46px;
+  mask-image:radial-gradient(ellipse at 50% 35%,#000 0%,transparent 78%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 35%,#000 0%,transparent 78%)}
+#bg .beam{position:absolute;top:-30%;width:42vw;height:170%;filter:blur(52px);opacity:.2;
+  background:linear-gradient(180deg,rgba(255,181,69,.5),transparent 70%);transform:rotate(14deg);
+  animation:beam 24s ease-in-out infinite}
+#bg .beam.b{left:auto;right:-10%;background:linear-gradient(180deg,rgba(46,211,195,.45),transparent 70%);
+  transform:rotate(-16deg);animation-duration:31s;animation-direction:reverse}
+@keyframes beam{0%,100%{transform:translateX(-6vw) rotate(14deg);opacity:.14}
+  50%{transform:translateX(9vw) rotate(10deg);opacity:.26}}
+#bg .skyline{position:absolute;left:0;right:0;bottom:0;height:22vh;opacity:.5;
+  background:
+   linear-gradient(to top,rgba(4,8,17,.96),transparent),
+   repeating-linear-gradient(90deg,rgba(18,30,51,.9) 0 34px,transparent 34px 46px,rgba(14,24,42,.9) 46px 92px,transparent 92px 108px);
+  mask-image:linear-gradient(to top,#000 20%,transparent);-webkit-mask-image:linear-gradient(to top,#000 20%,transparent)}
+#bg .mote{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,217,138,.7);
+  box-shadow:0 0 8px rgba(255,181,69,.75);animation:rise linear infinite}
+@keyframes rise{0%{transform:translateY(106vh) scale(.4);opacity:0}
+ 12%{opacity:.9}88%{opacity:.5}100%{transform:translateY(-10vh) scale(1.1);opacity:0}}
+#vig{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%,transparent 44%,rgba(0,0,0,.62) 100%)}
+
+/* ---------------- LAYOUT ---------------- */
+#app{position:relative;z-index:2;height:100dvh;width:100%}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:clamp(8px,1.5vh,18px)}
+.screen.active{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#screen-menu,#screen-campaign,#screen-result,#screen-lobby{overflow:auto}
+#screen-game{overflow:hidden}
+
+/* ---------------- COMPONENTS ---------------- */
+.panel{position:relative;background:var(--glass);border:1px solid var(--stroke);border-radius:var(--r);
+  box-shadow:var(--sh2),var(--sh1);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
+.panel::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.09),transparent 38%)}
+.btn{position:relative;background:linear-gradient(180deg,rgba(60,86,128,.55),rgba(24,38,64,.75));
+  border:1px solid var(--stroke);border-radius:13px;padding:.62em .95em;font-weight:700;letter-spacing:.2px;
+  transition:transform .14s,box-shadow .14s,border-color .14s,background .14s;
+  display:inline-flex;align-items:center;justify-content:center;gap:.45em;
+  box-shadow:0 8px 18px -10px rgba(0,0,0,.95),var(--sh1);color:var(--ink)}
+.btn:hover{border-color:var(--stroke2);transform:translateY(-2px);box-shadow:0 14px 26px -12px rgba(0,0,0,.95),0 0 0 1px rgba(255,181,69,.18),var(--sh1)}
+.btn:active{transform:translateY(0) scale(.985)}
+.btn.primary{background:linear-gradient(180deg,#ffc964,#e0912a);color:#241603;border-color:#ffd98a;
+  box-shadow:0 12px 26px -12px rgba(255,181,69,.85),var(--sh1)}
+.btn.primary:hover{box-shadow:0 18px 34px -14px rgba(255,181,69,.95),var(--sh1)}
+.btn.teal{background:linear-gradient(180deg,#39e4d2,#128a80);color:#03201e;border-color:#8ff2e8}
+.btn.ghost{background:rgba(255,255,255,.04)}
+.btn[disabled]{opacity:.38;pointer-events:none;filter:saturate(.4)}
+.iconBtn{background:rgba(255,255,255,.05);border:1px solid var(--stroke);border-radius:12px;width:2.2em;height:2.2em;
+  display:flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto;transition:.15s;box-shadow:var(--sh1)}
+.iconBtn:hover{border-color:var(--stroke2);background:rgba(255,181,69,.12)}
+.grad{background:linear-gradient(100deg,#ffd98a,#ffb545 38%,#2ed3c3 92%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.chip{display:inline-flex;align-items:center;gap:.34em;border:1px solid var(--stroke);border-radius:999px;
+  padding:.26em .7em;font-size:.8em;font-weight:700;background:rgba(9,16,29,.6);white-space:nowrap;box-shadow:var(--sh1)}
+.chip.rose{color:#ffb0aa;border-color:rgba(255,107,107,.42);background:rgba(122,34,34,.24)}
+.chip.mint{color:#a8f0cc;border-color:rgba(94,226,160,.42);background:rgba(28,107,69,.22)}
+.chip.amb{color:var(--amber2);border-color:rgba(255,181,69,.44);background:rgba(199,127,22,.18)}
+.chip.vio{color:#c9c0ff;border-color:rgba(139,124,246,.42);background:rgba(139,124,246,.14)}
+.small{font-size:.8em;color:var(--dim)}
+.tinput{width:100%;background:rgba(6,12,22,.72);border:1px solid var(--stroke);border-radius:11px;padding:.55em .7em;
+  color:var(--ink);outline:none;font-size:.9em}
+.tinput:focus{border-color:var(--stroke2);box-shadow:0 0 0 3px rgba(255,181,69,.12)}
+textarea.tinput{resize:vertical;min-height:64px;font-family:ui-monospace,monospace;font-size:.72em;word-break:break-all}
+
+/* ---------------- MENU ---------------- */
+.menuWrap{margin:auto;width:min(720px,100%);display:flex;flex-direction:column;gap:clamp(8px,1.5vh,15px);padding:8px 0}
+.badge{width:clamp(56px,10vh,86px);height:clamp(56px,10vh,86px);margin:0 auto;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:clamp(26px,5vh,42px);
+  background:conic-gradient(from 210deg,#ffd98a,#c77f16,#ffb545,#8a5a0f,#ffd98a);
+  box-shadow:0 0 0 4px rgba(255,181,69,.16),0 0 46px rgba(255,181,69,.35),inset 0 -8px 20px rgba(0,0,0,.45);
+  animation:pulse 4.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.05) rotate(4deg)}}
+.brand{text-align:center}
+.brand h1{margin:.28em 0 0;font-size:clamp(20px,4.3vh,36px);letter-spacing:1.4px;line-height:1.08;font-weight:900}
+.brand h2{margin:.14em 0 0;font-size:clamp(14px,2.3vh,20px);color:var(--amber2);font-weight:800;letter-spacing:.5px}
+.brand p{margin:.42em 0 0;color:var(--dim);font-size:.88em}
+.zpd{display:inline-flex;gap:.4em;align-items:center;margin-top:.5em;font-size:.72em;letter-spacing:2.4px;
+  color:#9fd9ff;border:1px solid rgba(46,211,195,.3);border-radius:999px;padding:.2em .8em;background:rgba(46,211,195,.08)}
+.menuGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:clamp(11px,2vh,18px)}
+.menuGrid .wide{grid-column:1/-1}
+.diffRow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.diffRow .btn{padding:.52em .2em;font-size:.84em;flex-direction:column;gap:.05em}
+.diffRow .btn.sel{background:linear-gradient(180deg,#ffc964,#e0912a);color:#241603;border-color:#ffd98a}
+.statsRow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+
+/* ---------------- CAMPAIGN ---------------- */
+.dossiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:10px;padding:4px 0 16px}
+.dossier{padding:11px}
+.dossier h3{margin:0 0 2px;font-size:.96em;color:var(--amber2);letter-spacing:.4px}
+.dossier .cases{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:8px}
+.caseBtn{border:1px solid var(--stroke);border-radius:10px;background:rgba(9,16,29,.6);padding:.44em 0;font-size:.78em;
+  font-weight:800;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--ink);transition:.15s}
+.caseBtn:hover{border-color:var(--stroke2);transform:translateY(-2px)}
+.caseBtn .st{font-size:.6em;color:var(--amber);letter-spacing:-1px;min-height:.85em}
+.caseBtn.locked{opacity:.3;pointer-events:none}
+.caseBtn.done{border-color:rgba(94,226,160,.5);background:rgba(28,107,69,.2)}
+
+/* ---------------- GAME ---------------- */
+.topbar{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.caseInfo{min-width:0;flex:1}
+.caseName{font-weight:900;font-size:.95em;color:var(--amber2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px}
+.caseSub{font-size:.73em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timerBox{font-variant-numeric:tabular-nums;font-weight:900;color:var(--teal);font-size:1em;padding:0 .25em;
+  text-shadow:0 0 14px rgba(46,211,195,.5)}
+.brief{flex:0 0 auto;margin:7px 0 6px;padding:.5em .75em;border-radius:12px;border:1px solid var(--stroke);
+  background:linear-gradient(100deg,rgba(139,124,246,.14),rgba(46,211,195,.08));font-size:.79em;color:#d5def0;
+  display:flex;gap:.5em;align-items:center;box-shadow:var(--sh1)}
+.brief span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cluebar{flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.scorebar{flex:0 0 auto;display:flex;gap:5px;overflow-x:auto;margin-bottom:6px;padding-bottom:2px}
+.pchip{display:flex;align-items:center;gap:.35em;border-radius:999px;padding:.24em .62em;font-size:.75em;font-weight:800;
+  border:1px solid var(--stroke);background:rgba(9,16,29,.68);white-space:nowrap;flex:0 0 auto;box-shadow:var(--sh1)}
+.pchip.turn{box-shadow:0 0 0 2px rgba(255,181,69,.4),0 0 18px rgba(255,181,69,.28)}
+.pchip .dot{width:.62em;height:.62em;border-radius:50%;flex:0 0 auto}
+.pchip .sc{color:var(--amber2)}
+.pchip.off{opacity:.42}
+
+#board{flex:1 1 auto;min-height:0;display:grid;gap:clamp(5px,1vh,10px);overflow:auto;padding:2px}
+#board[data-n="3"]{grid-template-columns:repeat(3,1fr)}
+#board[data-n="4"]{grid-template-columns:repeat(2,1fr)}
+#board[data-n="5"],#board[data-n="6"]{grid-template-columns:repeat(3,1fr)}
+#board[data-n="7"]{grid-template-columns:repeat(4,1fr)}
+@media(max-width:880px){
+  #board[data-n="3"]{grid-template-columns:1fr}
+  #board[data-n="4"],#board[data-n="5"],#board[data-n="6"],#board[data-n="7"]{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:400px){#board{gap:5px}}
+.card{position:relative;display:flex;flex-direction:column;gap:5px;min-height:0;padding:clamp(6px,1vh,10px);
+  border:1px solid var(--stroke);border-radius:15px;overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s;
+  background:linear-gradient(165deg,rgba(38,58,96,.72),rgba(13,22,40,.88));
+  box-shadow:0 16px 30px -18px rgba(0,0,0,.95),var(--sh1)}
+.card:hover{transform:translateY(-2px)}
+.card .aura{position:absolute;inset:-40% -20% auto -20%;height:120%;pointer-events:none;opacity:0;transition:opacity .25s;
+  background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.3),transparent 60%)}
+.card.mark-culprit{border-color:rgba(255,107,107,.75);box-shadow:0 0 0 1px rgba(255,107,107,.3),0 18px 34px -18px rgba(255,107,107,.6),var(--sh1)}
+.card.mark-culprit .aura{opacity:.22;background:radial-gradient(ellipse at 50% 0%,#ff6b6b,transparent 62%)}
+.card.mark-innocent{border-color:rgba(94,226,160,.7);box-shadow:0 0 0 1px rgba(94,226,160,.26),0 18px 34px -18px rgba(94,226,160,.5),var(--sh1)}
+.card.mark-innocent .aura{opacity:.2;background:radial-gradient(ellipse at 50% 0%,#5ee2a0,transparent 62%)}
+.cardTop{display:flex;align-items:center;gap:7px;flex:0 0 auto;position:relative}
+.portrait{width:2.5em;height:2.5em;flex:0 0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.3em;background:radial-gradient(circle at 34% 28%,#3c5f8f,#0d1728);
+  box-shadow:0 0 0 2px rgba(255,181,69,.55),0 0 18px rgba(255,181,69,.2),inset 0 -5px 12px rgba(0,0,0,.6)}
+.card.mark-culprit .portrait{box-shadow:0 0 0 2px rgba(255,107,107,.8),0 0 20px rgba(255,107,107,.35),inset 0 -5px 12px rgba(0,0,0,.6)}
+.card.mark-innocent .portrait{box-shadow:0 0 0 2px rgba(94,226,160,.8),0 0 20px rgba(94,226,160,.3),inset 0 -5px 12px rgba(0,0,0,.6)}
+.who{min-width:0;flex:1}
+.nm{font-weight:900;font-size:.92em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
+.diet{font-size:.67em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.diet.carn{color:#ffa79f}.diet.herb{color:#8ceebc}
+.tf{display:flex;gap:3px;flex:0 0 auto}
+.tfb{width:1.8em;height:1.8em;border-radius:9px;border:1px solid var(--stroke);background:rgba(6,12,22,.6);
+  font-weight:900;font-size:.74em;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;
+  color:var(--dim);transition:.14s}
+.tfb:hover{border-color:var(--stroke2);color:var(--ink)}
+.tfb.on.t{background:linear-gradient(180deg,#6bf0ad,#199d62);color:#04180e;border-color:#a8f0cc;box-shadow:0 0 14px rgba(94,226,160,.5)}
+.tfb.on.f{background:linear-gradient(180deg,#ff8b8b,#c03a3a);color:#1d0505;border-color:#ffb0aa;box-shadow:0 0 14px rgba(255,107,107,.5)}
+.stmt{flex:1 1 auto;min-height:0;overflow:auto;color:var(--paperInk);border-radius:11px;padding:.5em .6em;
+  background:linear-gradient(172deg,#f8f2e4,#e5dac2);
+  font-family:Georgia,"Noto Serif Thai",serif;font-size:.85em;line-height:1.33;
+  box-shadow:inset 0 2px 10px rgba(90,70,35,.22),0 2px 6px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.4)}
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:0 0 auto}
+.vb{border:1px solid var(--stroke);background:rgba(6,12,22,.6);border-radius:10px;padding:.36em .2em;font-size:.67em;
+  font-weight:900;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:.25em;line-height:1;
+  color:var(--dim);transition:.14s}
+.vb:hover{border-color:var(--stroke2);color:var(--ink)}
+.card.mark-innocent .vb.inn{background:linear-gradient(180deg,#6bf0ad,#199d62);color:#04180e;border-color:#a8f0cc}
+.card.mark-culprit .vb.cul{background:linear-gradient(180deg,#ff8b8b,#c03a3a);color:#1d0505;border-color:#ffb0aa}
+.owner{position:absolute;top:6px;right:6px;font-size:.58em;font-weight:900;padding:.14em .42em;border-radius:99px;
+  background:rgba(0,0,0,.55);border:1px solid var(--stroke);color:var(--ink);display:none}
+.owner.show{display:block}
+.bottombar{flex:0 0 auto;display:flex;gap:6px;align-items:center;margin-top:7px}
+.bottombar .btn{padding:.56em .72em;font-size:.85em}
+.bottombar .grow{flex:1}
+
+/* ---------------- LOBBY ---------------- */
+.lobbyWrap{margin:auto;width:min(760px,100%);display:flex;flex-direction:column;gap:10px;padding:6px 0}
+.seg{display:flex;gap:5px;flex-wrap:wrap}
+.seg button{border:1px solid var(--stroke);background:rgba(9,16,29,.6);border-radius:10px;padding:.38em .7em;
+  font-size:.8em;font-weight:800;color:var(--ink);transition:.14s}
+.seg button:hover{border-color:var(--stroke2)}
+.seg button.on{background:linear-gradient(180deg,#ffc964,#e0912a);color:#241603;border-color:#ffd98a}
+.row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:.5em 0;
+  border-bottom:1px dashed rgba(150,190,240,.14);flex-wrap:wrap}
+.row:last-of-type{border-bottom:0}
+.plist{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.prow{display:flex;align-items:center;gap:.55em;padding:.45em .6em;border-radius:11px;background:rgba(9,16,29,.55);
+  border:1px solid var(--stroke)}
+.prow .dot{width:.85em;height:.85em;border-radius:50%;flex:0 0 auto;box-shadow:0 0 10px currentColor}
+.prow .pn{flex:1;font-weight:800;font-size:.88em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.netLog{font-size:.74em;color:var(--dim);max-height:70px;overflow:auto;margin-top:5px;font-family:ui-monospace,monospace}
+
+/* ---------------- RESULT ---------------- */
+.resWrap{margin:auto;width:min(820px,100%);display:flex;flex-direction:column;gap:10px;padding:6px 0}
+.resHead{text-align:center;padding:clamp(11px,2vh,20px)}
+.resHead .big{font-size:clamp(20px,4.3vh,34px);font-weight:900;letter-spacing:1.2px}
+.stars{font-size:clamp(20px,4vh,32px);letter-spacing:5px;color:var(--amber);text-shadow:0 0 22px rgba(255,181,69,.55)}
+.chain{padding:11px;max-height:42vh;overflow:auto}
+.chain h4{margin:.5em 0 .4em;color:var(--amber2);font-size:.94em}
+.step{display:flex;gap:.55em;padding:.36em 0;border-bottom:1px dashed rgba(150,190,240,.13);font-size:.83em;line-height:1.38}
+.step:last-child{border-bottom:0}
+.step .k{flex:0 0 auto;font-weight:900}
+.k.t{color:var(--mint)}.k.f{color:var(--rose)}.k.g{color:#ffb0aa}.k.n{color:var(--amber2)}
+.rank{padding:10px}
+.rrow{display:flex;align-items:center;gap:.6em;padding:.42em .5em;border-radius:10px;font-size:.86em}
+.rrow+.rrow{margin-top:4px}
+.rrow.first{background:linear-gradient(100deg,rgba(255,181,69,.22),transparent);border:1px solid rgba(255,181,69,.3)}
+.rrow .pos{width:1.6em;font-weight:900;color:var(--amber2)}
+.rrow .pn{flex:1;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .dl{font-size:.8em;color:var(--dim)}
+.rrow .sc{font-weight:900;color:var(--amber2)}
+
+/* ---------------- MODAL ---------------- */
+.modalWrap{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:14px;
+  background:rgba(3,6,13,.76);backdrop-filter:blur(4px)}
+.modalWrap.show{display:flex;animation:fadeIn .2s ease}
+.modal{width:min(600px,100%);max-height:88vh;overflow:auto;padding:clamp(13px,2.2vh,22px)}
+.modal h3{margin:0 0 .45em;color:var(--amber2);font-size:1.1em}
+.modal p,.modal li{font-size:.87em;line-height:1.5;color:#d3ddf0}
+.modal ul{padding-left:1.1em;margin:.4em 0}
+.modalBtns{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+.modalBtns .btn{flex:1;min-width:118px}
+.hintBox{background:linear-gradient(100deg,rgba(46,211,195,.12),rgba(9,16,29,.6));border:1px solid var(--stroke);
+  border-radius:12px;padding:.6em .75em;margin:.42em 0;font-size:.87em;line-height:1.45}
+.hintBox b{color:var(--teal)}
+.warnBox{background:linear-gradient(100deg,rgba(255,107,107,.13),rgba(9,16,29,.6));border:1px solid rgba(255,107,107,.3);
+  border-radius:12px;padding:.6em .75em;margin:.42em 0;font-size:.87em;line-height:1.45}
+#toast{position:fixed;left:50%;bottom:clamp(66px,12vh,112px);transform:translateX(-50%) translateY(14px);z-index:900;
+  background:linear-gradient(180deg,rgba(38,58,96,.96),rgba(13,22,40,.96));border:1px solid var(--stroke2);
+  color:var(--ink);padding:.6em 1.05em;border-radius:999px;font-size:.85em;font-weight:800;opacity:0;pointer-events:none;
+  transition:.25s;box-shadow:0 14px 34px -14px #000;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div id="errorPanel" hidden><button id="errClose" type="button">✕</button>
+  <b>⚠ SYSTEM NOTICE</b> — <span id="errComp">-</span><pre id="errMsg"></pre></div>
+
+<div id="bg" aria-hidden="true">
+  <div class="grid"></div><div class="beam"></div><div class="beam b"></div><div class="skyline"></div>
+</div>
+<div id="vig" aria-hidden="true"></div>
+
+<div id="app">
+
+<!-- ================= MENU ================= -->
+<section id="screen-menu" class="screen active">
+  <div class="menuWrap">
+    <div class="brand">
+      <div class="badge">🕵️</div>
+      <h1 class="grad">A CARNIVORE DID IT!</h1>
+      <h2>สืบจากสัตว์</h2>
+      <div class="zpd">Z · P · D&nbsp; CASE FILES</div>
+      <p data-i18n="tagline">เกมสืบสวนเชิงตรรกะแบบร่วมมือ สำหรับนักสืบ 1–5 คน</p>
+    </div>
+
+    <div class="panel menuGrid">
+      <button class="btn primary wide" data-act="campaign">🗂️ <span data-i18n="mCampaign">โหมดแคมเปญ (แฟ้มคดี)</span></button>
+      <div class="wide small" data-i18n="mOpenLabel">คดีเปิด — เลือกระดับความยาก</div>
+      <div class="wide diffRow">
+        <button class="btn" data-diff="easy"><b data-i18n="dEasy">ง่าย</b><span class="small">3–4</span></button>
+        <button class="btn" data-diff="medium"><b data-i18n="dMed">ปานกลาง</b><span class="small">4–5</span></button>
+        <button class="btn" data-diff="hard"><b data-i18n="dHard">ยาก</b><span class="small">5–6</span></button>
+        <button class="btn" data-diff="expert"><b data-i18n="dExp">โหดมาก</b><span class="small">6–7</span></button>
+      </div>
+      <button class="btn primary wide" data-act="openCase">🐾 <span data-i18n="mNewCase">เริ่มคดีใหม่</span></button>
+      <button class="btn teal wide" data-act="lobby">📡 <span data-i18n="mOnline">เล่นกับเพื่อน (P2P)</span></button>
+      <button class="btn" data-act="rules">📜 <span data-i18n="mRules">กติกา</span></button>
+      <button class="btn" data-act="settings">⚙️ <span data-i18n="mSettings">ตั้งค่า</span></button>
+    </div>
+
+    <div class="statsRow">
+      <span class="chip amb">🏅 <span data-i18n="sSolved">ปิดคดี</span>: <b id="statSolved">0</b></span>
+      <span class="chip">⏱ <span data-i18n="sBest">เวลาดีสุด</span>: <b id="statBest">—</b></span>
+      <span class="chip rose">❌ <span data-i18n="sMiss">พลาด</span>: <b id="statMiss">0</b></span>
+      <span class="chip vio">💎 <span data-i18n="sScore">คะแนนรวม</span>: <b id="statScore">0</b></span>
+    </div>
+    <div class="statsRow small" id="modeLine">—</div>
+    <div class="statsRow small" id="storeLine"></div>
+  </div>
+</section>
+
+<!-- ================= CAMPAIGN ================= -->
+<section id="screen-campaign" class="screen">
+  <div class="topbar">
+    <button class="iconBtn" data-act="back">◀</button>
+    <div class="caseInfo">
+      <div class="caseName" data-i18n="cTitle">แฟ้มคดี — โหมดแคมเปญ</div>
+      <div class="caseSub" data-i18n="cSub">ปิดคดีเพื่อปลดล็อกคดีถัดไป ความยากจะเพิ่มขึ้นเรื่อย ๆ</div>
+    </div>
+    <span class="chip amb">⭐ <b id="starTotal">0</b>/180</span>
+  </div>
+  <div id="dossiers" class="dossiers"></div>
+</section>
+
+<!-- ================= LOBBY ================= -->
+<section id="screen-lobby" class="screen">
+  <div class="lobbyWrap">
+    <div class="topbar">
+      <button class="iconBtn" data-act="back">◀</button>
+      <div class="caseInfo">
+        <div class="caseName" data-i18n="lTitle">📡 ห้องสืบสวนร่วม (P2P)</div>
+        <div class="caseSub" data-i18n="lSub">เครื่องโฮสต์รันเอนจิ้นทั้งหมด • คะแนนแยกรายผู้เล่น</div>
+      </div>
+      <span class="chip" id="netStatus">OFFLINE</span>
+    </div>
+
+    <div class="panel" style="padding:12px">
+      <div class="row"><span data-i18n="lName">ชื่อนักสืบ</span>
+        <input id="inName" class="tinput" style="max-width:220px" maxlength="14" placeholder="Detective"></div>
+      <div class="row"><span data-i18n="lAvatar">อวาตาร์</span>
+        <div class="seg" id="avatarSeg"></div></div>
+      <div class="row"><span data-i18n="lTransport">ช่องทางเชื่อมต่อ</span>
+        <div class="seg">
+          <button data-tr="bc" data-i18n="lBC">เครื่องเดียวกัน / หลายแท็บ</button>
+          <button data-tr="rtc" data-i18n="lRTC">ทางไกล (WebRTC)</button>
+        </div></div>
+    </div>
+
+    <!-- BroadcastChannel -->
+    <div class="panel" id="paneBC" style="padding:12px">
+      <div class="row"><span data-i18n="lRoom">รหัสห้อง</span>
+        <input id="inRoom" class="tinput" style="max-width:150px;text-transform:uppercase" maxlength="6" placeholder="ZPD123"></div>
+      <div class="modalBtns">
+        <button class="btn primary" data-act="hostBC">👑 <span data-i18n="lHost">สร้างห้อง (โฮสต์)</span></button>
+        <button class="btn teal" data-act="joinBC">🚪 <span data-i18n="lJoin">เข้าห้อง</span></button>
+      </div>
+      <p class="small" data-i18n="lBCHelp">เปิดเกมนี้อีกแท็บ/อีกหน้าต่างบนเครื่องเดียวกัน แล้วใส่รหัสห้องเดียวกัน</p>
+    </div>
+
+    <!-- WebRTC -->
+    <div class="panel" id="paneRTC" style="padding:12px" hidden>
+      <div class="seg" style="margin-bottom:8px">
+        <button data-act="rtcHostMode" id="rtcHostBtn" data-i18n="lRtcHost">ฉันเป็นโฮสต์</button>
+        <button data-act="rtcGuestMode" id="rtcGuestBtn" data-i18n="lRtcGuest">ฉันเป็นผู้เข้าร่วม</button>
+      </div>
+      <div id="rtcHostPane" hidden>
+        <p class="small" data-i18n="lRtcHostHelp">1) กด “สร้างรหัสเชิญ” → ส่งข้อความให้เพื่อน 2) เพื่อนส่ง “รหัสตอบกลับ” มา → วางแล้วกดเชื่อมต่อ (ทำซ้ำได้สูงสุด 4 คน)</p>
+        <button class="btn primary" data-act="rtcOffer" style="width:100%;margin:6px 0">🔑 <span data-i18n="lMakeInvite">สร้างรหัสเชิญ</span></button>
+        <textarea id="outOffer" class="tinput" readonly placeholder="INVITE CODE"></textarea>
+        <button class="btn ghost" data-act="copyOffer" style="width:100%;margin:6px 0">📋 <span data-i18n="lCopy">คัดลอก</span></button>
+        <textarea id="inAnswer" class="tinput" placeholder="PASTE ANSWER CODE"></textarea>
+        <button class="btn teal" data-act="rtcAccept" style="width:100%;margin-top:6px">🔗 <span data-i18n="lConnect">เชื่อมต่อ</span></button>
+      </div>
+      <div id="rtcGuestPane" hidden>
+        <p class="small" data-i18n="lRtcGuestHelp">1) วาง “รหัสเชิญ” จากโฮสต์ 2) กดสร้างรหัสตอบกลับ 3) ส่งรหัสนั้นกลับไปให้โฮสต์</p>
+        <textarea id="inOffer" class="tinput" placeholder="PASTE INVITE CODE"></textarea>
+        <button class="btn primary" data-act="rtcAnswer" style="width:100%;margin:6px 0">🔑 <span data-i18n="lMakeAnswer">สร้างรหัสตอบกลับ</span></button>
+        <textarea id="outAnswer" class="tinput" readonly placeholder="ANSWER CODE"></textarea>
+        <button class="btn ghost" data-act="copyAnswer" style="width:100%;margin-top:6px">📋 <span data-i18n="lCopy">คัดลอก</span></button>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:12px">
+      <div class="row"><b data-i18n="lPlayers">นักสืบในห้อง</b><span class="chip" id="plCount">0</span></div>
+      <div class="plist" id="lobbyPlayers"></div>
+      <div class="netLog" id="netLog"></div>
+      <div class="modalBtns">
+        <button class="btn ghost" data-act="leaveRoom" data-i18n="lLeave">ออกจากห้อง</button>
+        <button class="btn primary" data-act="mpStart" id="mpStartBtn" data-i18n="lStart">เริ่มคดี (โฮสต์เท่านั้น)</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GAME ================= -->
+<section id="screen-game" class="screen">
+  <div class="topbar">
+    <button class="iconBtn" data-act="back">◀</button>
+    <div class="caseInfo">
+      <div class="caseName" id="gCaseName">CASE 1-1</div>
+      <div class="caseSub" id="gCaseSub">—</div>
+    </div>
+    <div class="timerBox" id="gTimer">00:00</div>
+    <button class="iconBtn" data-act="rules" title="Rules">📜</button>
+    <button class="iconBtn" data-act="settings" title="Settings">⚙️</button>
+  </div>
+
+  <div class="brief">🗞️<span id="gBrief">—</span></div>
+
+  <div class="cluebar">
+    <span class="chip rose">⛓ <span data-i18n="kCulprits">คนร้าย</span>: <b id="gK">1</b></span>
+    <span class="chip mint">✓ <span data-i18n="kTruths">คำจริง</span>: <b id="gT">2</b></span>
+    <span class="chip rose">✗ <span data-i18n="kLies">คำโกหก</span>: <b id="gL">1</b></span>
+    <span class="chip" id="gMarkChip">🎯 <b id="gMarks">0</b>/<b id="gMarksNeed">1</b></span>
+    <span class="chip vio" id="gNetChip" hidden>📡 <b id="gNetTxt">—</b></span>
+  </div>
+
+  <div class="scorebar" id="scorebar" hidden>
+    <div class="pchip" id="pl0" hidden><span class="dot"></span><span class="pn">—</span><span class="sc">0</span></div>
+    <div class="pchip" id="pl1" hidden><span class="dot"></span><span class="pn">—</span><span class="sc">0</span></div>
+    <div class="pchip" id="pl2" hidden><span class="dot"></span><span class="pn">—</span><span class="sc">0</span></div>
+    <div class="pchip" id="pl3" hidden><span class="dot"></span><span class="pn">—</span><span class="sc">0</span></div>
+    <div class="pchip" id="pl4" hidden><span class="dot"></span><span class="pn">—</span><span class="sc">0</span></div>
+  </div>
+
+  <div id="board" data-n="4">
+    <article class="card" id="card0" data-i="0" hidden><div class="aura"></div>
+      <div class="cardTop"><div class="portrait" id="p0">🦊</div>
+        <div class="who"><div class="nm" id="nm0">—</div><div class="diet" id="dt0">—</div></div>
+        <div class="tf"><button class="tfb t" data-mk="tfT" data-i="0">T</button><button class="tfb f" data-mk="tfF" data-i="0">F</button></div></div>
+      <div class="stmt" id="st0">—</div>
+      <div class="verdict"><button class="vb inn" data-mk="inn" data-i="0">✓ <span class="lblInn">บริสุทธิ์</span></button>
+        <button class="vb cul" data-mk="cul" data-i="0">⛓ <span class="lblCul">คนร้าย</span></button></div>
+      <div class="owner" id="ow0"></div></article>
+
+    <article class="card" id="card1" data-i="1" hidden><div class="aura"></div>
+      <div class="cardTop"><div class="portrait" id="p1">🦊</div>
+        <div class="who"><div class="nm" id="nm1">—</div><div class="diet" id="dt1">—</div></div>
+        <div class="tf"><button class="tfb t" data-mk="tfT" data-i="1">T</button><button class="tfb f" data-mk="tfF" data-i="1">F</button></div></div>
+      <div class="stmt" id="st1">—</div>
+      <div class="verdict"><button class="vb inn" data-mk="inn" data-i="1">✓ <span class="lblInn">บริสุทธิ์</span></button>
+        <button class="vb cul" data-mk="cul" data-i="1">⛓ <span class="lblCul">คนร้าย</span></button></div>
+      <div class="owner" id="ow1"></div></article>
+
+    <article class="card" id="card2" data-i="2" hidden><div class="aura"></div>
+      <div class="cardTop"><div class="portrait" id="p2">🦊</div>
+        <div class="who"><div class="nm" id="nm2">—</div><div class="diet" id="dt2">—</div></div>
+        <div class="tf"><button class="tfb t" data-mk="tfT" data-i="2">T</button><button class="tfb f" data-mk="tfF" data-i="2">F</button></div></div>
+      <div class="stmt" id="st2">—</div>
+      <div class="verdict"><button class="vb inn" data-mk="inn" data-i="2">✓ <span class="lblInn">บริสุทธิ์</span></button>
+        <button class="vb cul" data-mk="cul" data-i="2">⛓ <span class="lblCul">คนร้าย</span></button></div>
+      <div class="owner" id="ow2"></div></article>
+
+    <article class="card" id="card3" data-i="3" hidden><div class="aura"></div>
+      <div class="cardTop"><div class="portrait" id="p3">🦊</div>
+        <div class="who"><div class="nm" id="nm3">—</div><div class="diet" id="dt3">—</div></div>
+        <div class="tf"><button class="tfb t" data-mk="tfT" data-i="3">T</button><button class="tfb f" data-mk="tfF" data-i="3">F</button></div></div>
+      <div class="stmt" id="st3">—</div>
+      <div class="verdict"><button class="vb inn" data-mk="inn" data-i="3">✓ <span class="lblInn">บริสุทธิ์</span></button>
+        <button class="vb cul" data-mk="cul" data-i="3">⛓ <span class="lblCul">คนร้าย</span></button></div>
+      <div class="owner" id="ow3"></div></article>
+
+    <article class="card" id="card4" data-i="4" hidden><div class="aura"></div>
+      <div class="cardTop"><div class="portrait" id="p4">🦊</div>
+        <div class="who"><div class="nm" id="nm4">—</div><div class="diet" id="dt4">—</div></div>
+        <div class="tf"><button class="tfb t" data-mk="tfT" data-i="4">T</button><button class="tfb f" data-mk="tfF" data-i="4">F</button></div></div>
+      <div class="stmt" id="st4">—</div>
+      <div class="verdict"><button class="vb inn" data-mk="inn" data-i="4">✓ <span class="lblInn">บริสุทธิ์</span></button>
+        <button class="vb cul" data-mk="cul" data-i="4">⛓ <span class="lblCul">คนร้าย</span></button></div>
+      <div class="owner" id="ow4"></div></article>
+
+    <article class="card" id="card5" data-i="5" hidden><div class="aura"></div>
+      <div class="cardTop"><div class="portrait" id="p5">🦊</div>
+        <div class="who"><div class="nm" id="nm5">—</div><div class="diet" id="dt5">—</div></div>
+        <div class="tf"><button class="tfb t" data-mk="tfT" data-i="5">T</button><button class="tfb f" data-mk="tfF" data-i="5">F</button></div></div>
+      <div class="stmt" id="st5">—</div>
+      <div class="verdict"><button class="vb inn" data-mk="inn" data-i="5">✓ <span class="lblInn">บริสุทธิ์</span></button>
+        <button class="vb cul" data-mk="cul" data-i="5">⛓ <span class="lblCul">คนร้าย</span></button></div>
+      <div class="owner" id="ow5"></div></article>
+
+    <article class="card" id="card6" data-i="6" hidden><div class="aura"></div>
+      <div class="cardTop"><div class="portrait" id="p6">🦊</div>
+        <div class="who"><div class="nm" id="nm6">—</div><div class="diet" id="dt6">—</div></div>
+        <div class="tf"><button class="tfb t" data-mk="tfT" data-i="6">T</button><button class="tfb f" data-mk="tfF" data-i="6">F</button></div></div>
+      <div class="stmt" id="st6">—</div>
+      <div class="verdict"><button class="vb inn" data-mk="inn" data-i="6">✓ <span class="lblInn">บริสุทธิ์</span></button>
+        <button class="vb cul" data-mk="cul" data-i="6">⛓ <span class="lblCul">คนร้าย</span></button></div>
+      <div class="owner" id="ow6"></div></article>
+  </div>
+
+  <div class="bottombar">
+    <button class="btn ghost" data-act="resetMarks" title="reset">↺</button>
+    <button class="btn" data-act="hint">🤖 <span data-i18n="bHint">คำใบ้</span></button>
+    <button class="btn ghost" id="passBtn" data-act="pass" hidden>🔄 <span data-i18n="bPass">ส่งต่อ</span></button>
+    <button class="btn primary grow" data-act="check">🔍 <span data-i18n="bCheck">ตรวจคำตอบ</span></button>
+  </div>
+</section>
+
+<!-- ================= RESULT ================= -->
+<section id="screen-result" class="screen">
+  <div class="resWrap">
+    <div class="panel resHead">
+      <div class="big" id="resTitle">—</div>
+      <div class="stars" id="resStars">☆☆☆</div>
+      <div class="statsRow" style="margin-top:9px">
+        <span class="chip">⏱ <b id="resTime">—</b></span>
+        <span class="chip rose">❌ <b id="resMiss">0</b></span>
+        <span class="chip vio">🤖 <b id="resHints">0</b></span>
+      </div>
+    </div>
+    <div class="panel rank" id="rankPanel" hidden>
+      <h4 style="margin:.1em 0 .5em;color:var(--amber2);font-size:.95em" data-i18n="rRank">🏆 คะแนนรายผู้เล่น</h4>
+      <div id="rankList"></div>
+    </div>
+    <div class="panel chain">
+      <h4 data-i18n="rChain">🧠 สายโซ่การให้เหตุผล</h4>
+      <div id="chainList"></div>
+    </div>
+    <div class="modalBtns">
+      <button class="btn ghost" data-act="toMenu" data-i18n="rMenu">เมนูหลัก</button>
+      <button class="btn" data-act="replay" data-i18n="rReplay">เล่นคดีนี้ใหม่</button>
+      <button class="btn primary" data-act="next" data-i18n="rNext">คดีถัดไป ▶</button>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ================= MODALS ================= -->
+<div class="modalWrap" id="modal-rules"><div class="modal panel">
+  <h3>📜 <span data-i18n="ruTitle">กติกา</span></h3><div id="rulesBody"></div>
+  <div class="modalBtns"><button class="btn primary" data-act="closeModal" data-i18n="close">ปิด</button></div>
+</div></div>
+
+<div class="modalWrap" id="modal-settings"><div class="modal panel">
+  <h3>⚙️ <span data-i18n="seTitle">ตั้งค่า</span></h3>
+  <div class="row"><span data-i18n="seLang">ภาษา / Language</span>
+    <div class="seg"><button data-set="lang" data-val="th">ไทย</button><button data-set="lang" data-val="en">EN</button></div></div>
+  <div class="row"><span data-i18n="seSfx">เสียงเอฟเฟกต์</span>
+    <div class="seg"><button data-set="sfx" data-val="1" data-i18n="on">เปิด</button><button data-set="sfx" data-val="0" data-i18n="off">ปิด</button></div></div>
+  <div class="row"><span data-i18n="seMusic">ดนตรีบรรยากาศ</span>
+    <div class="seg"><button data-set="music" data-val="1" data-i18n="on">เปิด</button><button data-set="music" data-val="0" data-i18n="off">ปิด</button></div></div>
+  <div class="row"><span data-i18n="sePlayers">นักสืบในเครื่องนี้</span>
+    <div class="seg"><button data-set="players" data-val="1">1</button><button data-set="players" data-val="2">2</button><button data-set="players" data-val="3">3</button><button data-set="players" data-val="4">4</button><button data-set="players" data-val="5">5</button></div></div>
+  <div class="row"><span data-i18n="seMode">โหมดเล่น</span>
+    <div class="seg"><button data-set="mode" data-val="solo" data-i18n="modeSolo">เดี่ยว</button><button data-set="mode" data-val="pass" data-i18n="modePass">ผลัดกันเล่น</button></div></div>
+  <div class="modalBtns">
+    <button class="btn ghost" data-act="wipe" data-i18n="seWipe">ล้างความคืบหน้า</button>
+    <button class="btn primary" data-act="closeModal" data-i18n="close">ปิด</button></div>
+</div></div>
+
+<div class="modalWrap" id="modal-hint"><div class="modal panel">
+  <h3>🤖 <span data-i18n="hiTitle">ผู้ช่วย DEDUCT-O-BOT</span></h3>
+  <p class="small" data-i18n="hiSub">บอทให้เบาะแสเชิงตรรกะเท่านั้น และจะไม่เฉลยคำตอบให้โดยอัตโนมัติ</p>
+  <div id="hintList"></div>
+  <div class="modalBtns">
+    <button class="btn" data-act="nextHint" data-i18n="hiMore">ขอคำใบ้ถัดไป</button>
+    <button class="btn primary" data-act="closeModal" data-i18n="close">ปิด</button></div>
+</div></div>
+
+<div class="modalWrap" id="modal-wrong"><div class="modal panel">
+  <h3 id="wrongTitle">🧐 —</h3><div id="wrongBody"></div>
+  <div class="modalBtns">
+    <button class="btn ghost" data-act="reveal" data-i18n="wReveal">ยอมแพ้ & ดูเฉลย</button>
+    <button class="btn primary" data-act="closeModal" data-i18n="wKeep">สืบต่อ</button></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+/* ============================================================
+   0 · SAFETY NET
+   ============================================================ */
+function showError(comp,err){
+  try{
+    var p=document.getElementById('errorPanel');
+    if(p){ p.hidden=false;
+      document.getElementById('errComp').textContent=String(comp);
+      document.getElementById('errMsg').textContent=(err&&err.stack)?err.stack:String(err); }
+  }catch(e){}
+  try{console.error('['+comp+']',err);}catch(e){}
+}
+window.addEventListener('error',function(e){ showError('runtime',e.error||e.message); });
+window.addEventListener('unhandledrejection',function(e){ showError('promise',e.reason); });
+function guard(name,fn){ try{ return fn(); }catch(err){ showError(name,err); return null; } }
+var $=function(id){ return document.getElementById(id); };
+function closestEl(el,sel){ while(el&&el.nodeType===1){ if(el.matches&&el.matches(sel)) return el; el=el.parentElement; } return null; }
+function setText(id,v){ var e=$(id); if(e) e.textContent=v; }
+
+/* ============================================================
+   1 · SAFE STORAGE  (fixes sandbox SecurityError)
+   ============================================================ */
+var Store=(function(){
+  var mem={},ok=false;
+  try{ var ls=window.localStorage; ls.setItem('__probe__','1'); ls.removeItem('__probe__'); ok=true; }
+  catch(e){ ok=false; }
+  return {
+    ok:function(){ return ok; },
+    get:function(k){ try{ return ok?window.localStorage.getItem(k):(mem[k]||null); }
+                     catch(e){ ok=false; return mem[k]||null; } },
+    set:function(k,v){ mem[k]=v; try{ if(ok) window.localStorage.setItem(k,v); }catch(e){ ok=false; } },
+    del:function(k){ delete mem[k]; try{ if(ok) window.localStorage.removeItem(k); }catch(e){ ok=false; } }
+  };
+})();
+
+/* ============================================================
+   2 · CAST & CASES
+   ============================================================ */
+var ANIMALS=[
+ {id:'shark',  th:'ฉลาม',   en:'Shark',     e:'🦈', d:'carn', job:{th:'เจ้าของบ่อน้ำ',en:'Pool Boss'}},
+ {id:'panther',th:'เสือดำ',  en:'Panther',   e:'🐆', d:'carn', job:{th:'นักวิ่งกลางคืน',en:'Night Runner'}},
+ {id:'bear',   th:'หมี',     en:'Bear',      e:'🐻', d:'carn', job:{th:'คนทำขนมปัง',en:'Baker'}},
+ {id:'tiger',  th:'เสือโคร่ง',en:'Tiger',    e:'🐯', d:'carn', job:{th:'ยามกลางคืน',en:'Night Guard'}},
+ {id:'fox',    th:'จิ้งจอก', en:'Fox',       e:'🦊', d:'carn', job:{th:'พ่อค้าเร่',en:'Street Hustler'}},
+ {id:'wolf',   th:'หมาป่า',  en:'Wolf',      e:'🐺', d:'carn', job:{th:'คนส่งของ',en:'Courier'}},
+ {id:'croc',   th:'จระเข้',  en:'Crocodile', e:'🐊', d:'carn', job:{th:'คนดูแลท่อ',en:'Sewer Keeper'}},
+ {id:'owl',    th:'นกฮูก',   en:'Owl',       e:'🦉', d:'carn', job:{th:'บรรณารักษ์',en:'Librarian'}},
+ {id:'eagle',  th:'อินทรี',  en:'Eagle',     e:'🦅', d:'carn', job:{th:'นักบินตรวจการณ์',en:'Sky Scout'}},
+ {id:'snake',  th:'งู',      en:'Snake',     e:'🐍', d:'carn', job:{th:'นายหน้า',en:'Broker'}},
+ {id:'lion',   th:'สิงโต',   en:'Lion',      e:'🦁', d:'carn', job:{th:'นายกเทศมนตรี',en:'Mayor'}},
+ {id:'cheetah',th:'เสือชีตาห์',en:'Cheetah', e:'🐅', d:'carn', job:{th:'เจ้าหน้าที่รับแจ้ง',en:'Front Desk'}},
+ {id:'iguana', th:'อิกัวนา', en:'Iguana',    e:'🦎', d:'herb', job:{th:'คนสวน',en:'Gardener'}},
+ {id:'peacock',th:'นกยูง',   en:'Peacock',   e:'🦚', d:'herb', job:{th:'ดีไซเนอร์',en:'Designer'}},
+ {id:'deer',   th:'กวาง',    en:'Deer',      e:'🦌', d:'herb', job:{th:'ครูโรงเรียน',en:'Teacher'}},
+ {id:'rabbit', th:'กระต่าย', en:'Rabbit',    e:'🐰', d:'herb', job:{th:'ตำรวจฝึกหัด',en:'Rookie Officer'}},
+ {id:'eleph',  th:'ช้าง',    en:'Elephant',  e:'🐘', d:'herb', job:{th:'เจ้าของร้านไอติม',en:'Ice-Cream Shop'}},
+ {id:'turtle', th:'เต่า',    en:'Tortoise',  e:'🐢', d:'herb', job:{th:'คนเฝ้าสวน',en:'Park Warden'}},
+ {id:'sloth',  th:'สลอธ',    en:'Sloth',     e:'🦥', d:'herb', job:{th:'เสมียนทะเบียน',en:'DMV Clerk'}},
+ {id:'goat',   th:'แพะ',     en:'Goat',      e:'🐐', d:'herb', job:{th:'คนเก็บขยะ',en:'Janitor'}},
+ {id:'koala',  th:'โคอาลา',  en:'Koala',     e:'🐨', d:'herb', job:{th:'นักข่าว',en:'Reporter'}},
+ {id:'hippo',  th:'ฮิปโป',   en:'Hippo',     e:'🦛', d:'herb', job:{th:'คนขับรถราง',en:'Tram Driver'}},
+ {id:'panda',  th:'แพนด้า',  en:'Panda',     e:'🐼', d:'herb', job:{th:'พ่อครัว',en:'Chef'}},
+ {id:'sheep',  th:'แกะ',     en:'Sheep',     e:'🐑', d:'herb', job:{th:'ผู้ช่วยนายกฯ',en:'Assistant Mayor'}}
+];
+var BYID={}; (function(){ var i; for(i=0;i<ANIMALS.length;i++) BYID[ANIMALS[i].id]=ANIMALS[i]; })();
+
+var CRIMES=[
+ {th:'พายบลูเบอร์รี่ของท่านนายกฯ หายไปจากขอบหน้าต่างศาลากลาง',en:'The Mayor\u2019s blueberry pie vanished from the city-hall windowsill.'},
+ {th:'โหลน้ำผึ้งสำรองของย่านทุ่งหญ้าถูกงัดกลางดึก',en:'The Meadowlands honey reserve was cracked open at midnight.'},
+ {th:'ถ้วยรางวัลวิ่งประจำเมืองหายไปจากตู้กระจก',en:'The City Marathon trophy disappeared from its glass case.'},
+ {th:'รั้วสวนผักของคุณยายเต่าถูกเหยียบพังเมื่อคืน',en:'Granny Tortoise\u2019s vegetable fence was trampled last night.'},
+ {th:'ไฟถนนทั้งซอยดับพร้อมกันตอนตีสาม ก่อนเกิดเหตุพอดี',en:'Every lamp on Burrow Lane went dark at 3 AM, right before the crime.'},
+ {th:'ซองจดหมายลับของกรมตำรวจถูกเปิดอ่านก่อนถึงมือผู้รับ',en:'A sealed ZPD envelope was opened before delivery.'},
+ {th:'เค้กแต่งงานของคู่บ่าวสาวนกยูงถูกกัดไปหนึ่งคำใหญ่',en:'One enormous bite was taken out of the peacock wedding cake.'},
+ {th:'กุญแจห้องเก็บของหายไปพร้อมขนมปังทั้งถาด',en:'The pantry key vanished along with an entire bread tray.'},
+ {th:'รถรางสายกลางเมืองถูกขับออกจากอู่ตอนตีสี่',en:'The downtown tram was driven out of the depot at 4 AM.'},
+ {th:'ป้ายโฆษณายักษ์กลางจัตุรัสถูกพ่นสีทับทั้งแผ่น',en:'The giant billboard in the plaza was spray-painted over.'}
+];
+
+/* ============================================================
+   3 · I18N
+   ============================================================ */
+var DICT={
+ tagline:{th:'เกมสืบสวนเชิงตรรกะแบบร่วมมือ สำหรับนักสืบ 1–5 คน',en:'A cooperative logic-deduction game for 1–5 detectives'},
+ mCampaign:{th:'โหมดแคมเปญ (แฟ้มคดี)',en:'Campaign Mode (Dossiers)'},
+ mOpenLabel:{th:'คดีเปิด — เลือกระดับความยาก',en:'Open Case — choose difficulty'},
+ mNewCase:{th:'เริ่มคดีใหม่',en:'Start New Case'},
+ mOnline:{th:'เล่นกับเพื่อน (P2P)',en:'Play with Friends (P2P)'},
+ mRules:{th:'กติกา',en:'Rules'}, mSettings:{th:'ตั้งค่า',en:'Settings'},
+ dEasy:{th:'ง่าย',en:'Easy'}, dMed:{th:'ปานกลาง',en:'Medium'}, dHard:{th:'ยาก',en:'Hard'}, dExp:{th:'โหดมาก',en:'Expert'},
+ sSolved:{th:'ปิดคดี',en:'Closed'}, sBest:{th:'เวลาดีสุด',en:'Best'}, sMiss:{th:'พลาด',en:'Misses'}, sScore:{th:'คะแนนรวม',en:'Score'},
+ cTitle:{th:'แฟ้มคดี — โหมดแคมเปญ',en:'Dossiers — Campaign Mode'},
+ cSub:{th:'ปิดคดีเพื่อปลดล็อกคดีถัดไป ความยากจะเพิ่มขึ้นเรื่อย ๆ',en:'Close a case to unlock the next. Difficulty keeps rising.'},
+ lTitle:{th:'📡 ห้องสืบสวนร่วม (P2P)',en:'📡 Co-op Precinct Room (P2P)'},
+ lSub:{th:'เครื่องโฮสต์รันเอนจิ้นทั้งหมด • คะแนนแยกรายผู้เล่น',en:'Host runs the whole engine • per-player scoring'},
+ lName:{th:'ชื่อนักสืบ',en:'Detective name'}, lAvatar:{th:'อวาตาร์',en:'Avatar'},
+ lTransport:{th:'ช่องทางเชื่อมต่อ',en:'Connection'},
+ lBC:{th:'เครื่องเดียวกัน / หลายแท็บ',en:'Same device / tabs'}, lRTC:{th:'ทางไกล (WebRTC)',en:'Remote (WebRTC)'},
+ lRoom:{th:'รหัสห้อง',en:'Room code'}, lHost:{th:'สร้างห้อง (โฮสต์)',en:'Create room (host)'}, lJoin:{th:'เข้าห้อง',en:'Join room'},
+ lBCHelp:{th:'เปิดเกมนี้อีกแท็บ/อีกหน้าต่างบนเครื่องเดียวกัน แล้วใส่รหัสห้องเดียวกัน',en:'Open this game in another tab/window on the same device and enter the same room code.'},
+ lRtcHost:{th:'ฉันเป็นโฮสต์',en:'I am the host'}, lRtcGuest:{th:'ฉันเป็นผู้เข้าร่วม',en:'I am a guest'},
+ lRtcHostHelp:{th:'1) กด “สร้างรหัสเชิญ” → ส่งให้เพื่อน 2) เพื่อนส่งรหัสตอบกลับมา → วางแล้วกดเชื่อมต่อ (สูงสุด 4 คน)',en:'1) Create an invite code and send it. 2) Paste their answer code and connect. (up to 4 guests)'},
+ lRtcGuestHelp:{th:'1) วางรหัสเชิญจากโฮสต์ 2) กดสร้างรหัสตอบกลับ 3) ส่งรหัสนั้นกลับไป',en:'1) Paste the host invite code. 2) Create your answer code. 3) Send it back to the host.'},
+ lMakeInvite:{th:'สร้างรหัสเชิญ',en:'Create invite code'}, lMakeAnswer:{th:'สร้างรหัสตอบกลับ',en:'Create answer code'},
+ lCopy:{th:'คัดลอก',en:'Copy'}, lConnect:{th:'เชื่อมต่อ',en:'Connect'},
+ lPlayers:{th:'นักสืบในห้อง',en:'Detectives in room'}, lLeave:{th:'ออกจากห้อง',en:'Leave room'},
+ lStart:{th:'เริ่มคดี (โฮสต์เท่านั้น)',en:'Start case (host only)'},
+ kCulprits:{th:'คนร้าย',en:'Culprits'}, kTruths:{th:'คำจริง',en:'True'}, kLies:{th:'คำโกหก',en:'False'},
+ bHint:{th:'คำใบ้',en:'Hint'}, bCheck:{th:'ตรวจคำตอบ',en:'Check Solution'}, bPass:{th:'ส่งต่อ',en:'Pass'},
+ rChain:{th:'🧠 สายโซ่การให้เหตุผล',en:'🧠 The logical chain'}, rRank:{th:'🏆 คะแนนรายผู้เล่น',en:'🏆 Per-player scores'},
+ rMenu:{th:'เมนูหลัก',en:'Main menu'}, rReplay:{th:'เล่นคดีนี้ใหม่',en:'Replay case'}, rNext:{th:'คดีถัดไป ▶',en:'Next case ▶'},
+ ruTitle:{th:'กติกา',en:'How to play'}, seTitle:{th:'ตั้งค่า',en:'Settings'},
+ seLang:{th:'ภาษา / Language',en:'Language'}, seSfx:{th:'เสียงเอฟเฟกต์',en:'Sound effects'},
+ seMusic:{th:'ดนตรีบรรยากาศ',en:'Ambient music'}, sePlayers:{th:'นักสืบในเครื่องนี้',en:'Local detectives'},
+ seMode:{th:'โหมดเล่น',en:'Play mode'}, modeSolo:{th:'เดี่ยว',en:'Solo'}, modePass:{th:'ผลัดกันเล่น',en:'Pass & Play'},
+ seWipe:{th:'ล้างความคืบหน้า',en:'Wipe progress'},
+ on:{th:'เปิด',en:'On'}, off:{th:'ปิด',en:'Off'}, close:{th:'ปิด',en:'Close'},
+ hiTitle:{th:'ผู้ช่วย DEDUCT-O-BOT',en:'DEDUCT-O-BOT assistant'},
+ hiSub:{th:'บอทให้เบาะแสเชิงตรรกะเท่านั้น และจะไม่เฉลยคำตอบให้โดยอัตโนมัติ',en:'Logical nudges only — it never reveals the solution by itself.'},
+ hiMore:{th:'ขอคำใบ้ถัดไป',en:'Another hint'},
+ wReveal:{th:'ยอมแพ้ & ดูเฉลย',en:'Give up & reveal'}, wKeep:{th:'สืบต่อ',en:'Keep investigating'},
+ innocent:{th:'บริสุทธิ์',en:'INNOCENT'}, culprit:{th:'คนร้าย',en:'CULPRIT'},
+ carn:{th:'🥩 กินเนื้อ',en:'🥩 Carnivore'}, herb:{th:'🌿 กินพืช',en:'🌿 Herbivore'},
+ needMarks:{th:'ต้องระบุคนร้ายให้ครบ {n} ตัวก่อนตรวจคำตอบ',en:'Mark exactly {n} culprit(s) before checking.'},
+ solved:{th:'ปิดคดีสำเร็จ!',en:'CASE CLOSED!'}, failed:{th:'คดียังไม่คลี่คลาย',en:'CASE UNSOLVED'},
+ turn:{th:'ตานักสืบ {n}',en:'Detective {n}'},
+ wrongT:{th:'🧐 ยังไม่ลงตัว',en:'🧐 That doesn\u2019t add up'},
+ hintNoMore:{th:'บอทหมดคำใบ้แล้ว — ที่เหลือต้องใช้สมองของคุณ!',en:'The bot is out of hints — the rest is up to your brain!'},
+ wiped:{th:'ล้างข้อมูลแล้ว',en:'Progress wiped'}, locked:{th:'ยังไม่ปลดล็อก',en:'Locked'},
+ genFail:{th:'สร้างคดีไม่สำเร็จ ใช้คดีสำรองแทน',en:'Generator fallback case used'},
+ hostOnly:{th:'เฉพาะโฮสต์เท่านั้นที่เลือกคดีได้',en:'Only the host can pick the case'},
+ waitHost:{th:'รอโฮสต์เริ่มคดี…',en:'Waiting for the host to start a case…'},
+ joined:{th:'{n} เข้าร่วมห้องแล้ว',en:'{n} joined the room'},
+ leftRoom:{th:'{n} ออกจากห้อง',en:'{n} left the room'},
+ roomNeed:{th:'กรุณาใส่รหัสห้อง',en:'Please enter a room code'},
+ noBC:{th:'เบราว์เซอร์นี้ไม่รองรับ BroadcastChannel',en:'BroadcastChannel is not supported here'},
+ noRTC:{th:'เบราว์เซอร์นี้ไม่รองรับ WebRTC',en:'WebRTC is not supported here'},
+ copied:{th:'คัดลอกแล้ว',en:'Copied'},
+ connected:{th:'เชื่อมต่อสำเร็จ',en:'Connected'},
+ badCode:{th:'รหัสไม่ถูกต้อง',en:'Invalid code'},
+ memOnly:{th:'⚠ เซฟลงเครื่องไม่ได้ (โหมด sandbox) — ความคืบหน้าจะอยู่แค่รอบนี้',en:'⚠ Storage blocked (sandbox) — progress lasts this session only'},
+ hostLeft:{th:'โฮสต์ออกจากห้องแล้ว',en:'The host left the room'}
+};
+function tr(k){ var e=DICT[k]; if(!e) return k; return e[S.lang]||e.en||k; }
+
+/* ============================================================
+   4 · HELPERS
+   ============================================================ */
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0;
+  var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }; }
+function ri(rng,n){ return Math.floor(rng()*n); }
+function pick(rng,a){ return a[ri(rng,a.length)]; }
+function shuffle(rng,arr){ var a=arr.slice(),i,j,t;
+  for(i=a.length-1;i>0;i--){ j=ri(rng,i+1); t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function range(n){ var a=[],i; for(i=0;i<n;i++) a.push(i); return a; }
+function popcount(x){ var c=0; while(x){ x&=x-1; c++; } return c; }
+function maskArr(m,n){ var a=[],i; for(i=0;i<n;i++) a.push(((m>>i)&1)===1); return a; }
+function fmtTime(s){ s=Math.max(0,Math.floor(s)); var m=Math.floor(s/60),x=s%60;
+  return (m<10?'0':'')+m+':'+(x<10?'0':'')+x; }
+function cap(s){ return s?s.charAt(0).toUpperCase()+s.slice(1):s; }
+function uid(){ return 'P'+Math.random().toString(36).slice(2,8).toUpperCase(); }
+
+/* ============================================================
+   5 · LOGIC ENGINE
+   ============================================================ */
+function cmpOp(v,op,n){ return op==='=' ? v===n : v>=n; }
+function evalNode(nd,c){
+  switch(nd.t){
+    case 'culprit':  return c.cul[nd.i];
+    case 'innocent': return !c.cul[nd.i];
+    case 'truth':    return c.tru[nd.i];
+    case 'lie':      return !c.tru[nd.i];
+    case 'dietDidIt':{ var a; for(a=0;a<c.n;a++) if(c.cul[a]&&c.cast[a].d===nd.d) return true; return false; }
+    case 'noDietCulprit':{ var b; for(b=0;b<c.n;b++) if(c.cul[b]&&c.cast[b].d===nd.d) return false; return true; }
+    case 'allCulpritsDiet':{ var e; for(e=0;e<c.n;e++) if(c.cul[e]&&c.cast[e].d!==nd.d) return false; return true; }
+    case 'countLiars':{ var f=0,g; for(g=0;g<c.n;g++) if(!c.tru[g]) f++; return cmpOp(f,nd.op,nd.n); }
+    case 'groupCulpritCount':{ var h=0,k; for(k=0;k<nd.list.length;k++) if(c.cul[nd.list[k]]) h++; return cmpOp(h,nd.op,nd.n); }
+    case 'groupLiarCount':{ var l=0,m; for(m=0;m<nd.list.length;m++) if(!c.tru[nd.list[m]]) l++; return cmpOp(l,nd.op,nd.n); }
+    case 'and': return evalNode(nd.a,c)&&evalNode(nd.b,c);
+    case 'or':  return evalNode(nd.a,c)||evalNode(nd.b,c);
+    case 'if':  return (!evalNode(nd.a,c))||evalNode(nd.b,c);
+    case 'xor': return evalNode(nd.a,c)!==evalNode(nd.b,c);
+    case 'not': return !evalNode(nd.a,c);
+  }
+  return false;
+}
+function analyze(cast,stmts,K){
+  var n=cast.length,models=[],byT={},cm,tm,i,ok,cul,tru,mo;
+  for(cm=0;cm<(1<<n);cm++){
+    if(popcount(cm)!==K) continue;
+    cul=maskArr(cm,n);
+    for(tm=0;tm<(1<<n);tm++){
+      tru=maskArr(tm,n); ok=true;
+      var ctx={cul:cul,tru:tru,cast:cast,n:n};
+      for(i=0;i<n;i++){ if(evalNode(stmts[i],ctx)!==tru[i]){ ok=false; break; } }
+      if(ok){ mo={cm:cm,tm:tm,trues:popcount(tm)}; models.push(mo);
+        if(!byT[mo.trues]) byT[mo.trues]=[]; byT[mo.trues].push(mo); }
+    }
+  }
+  return {models:models,byT:byT};
+}
+
+/* ---------- natural language ---------- */
+function aName(cast,i,lang){ var a=cast[i]; return lang==='th'?a.th:a.en; }
+function dietWord(d,lang){ if(lang==='th') return d==='carn'?'สัตว์กินเนื้อ':'สัตว์กินพืช';
+  return d==='carn'?'carnivore':'herbivore'; }
+function subjOf(c,i){ if(i===c.sp) return c.lang==='th'?'ฉัน':'I'; return aName(c.cast,i,c.lang); }
+function beOf(c,i){ return i===c.sp?'am':'is'; }
+function listNames(c,list){
+  var nm=list.map(function(i){ return aName(c.cast,i,c.lang); });
+  if(c.lang==='th') return nm.join(' และ ');
+  if(nm.length<2) return nm[0]||'';
+  return nm.slice(0,-1).join(', ')+' and '+nm[nm.length-1];
+}
+function clause(nd,c){
+  var L=c.lang,th=(L==='th');
+  switch(nd.t){
+    case 'culprit':  return th?(subjOf(c,nd.i)+'เป็นคนร้าย'):(subjOf(c,nd.i)+' '+beOf(c,nd.i)+' guilty');
+    case 'innocent': return th?(subjOf(c,nd.i)+'บริสุทธิ์'):(subjOf(c,nd.i)+' '+beOf(c,nd.i)+' innocent');
+    case 'truth':    return th?(subjOf(c,nd.i)+'พูดความจริง'):(subjOf(c,nd.i)+' '+beOf(c,nd.i)+' telling the truth');
+    case 'lie':      return th?(subjOf(c,nd.i)+'กำลังโกหก'):(subjOf(c,nd.i)+' '+beOf(c,nd.i)+' lying');
+    case 'dietDidIt':return th?('มี'+dietWord(nd.d,L)+'เป็นคนร้าย'):('a '+dietWord(nd.d,L)+' is guilty');
+    case 'noDietCulprit':return th?('ไม่มี'+dietWord(nd.d,L)+'ตัวไหนเป็นคนร้าย'):('no '+dietWord(nd.d,L)+' is guilty');
+    case 'allCulpritsDiet':return th?('คนร้ายทุกตัวเป็น'+dietWord(nd.d,L)):('every culprit is a '+dietWord(nd.d,L));
+    case 'countLiars': return th?('มีพวกเรา'+(nd.op==='='?'พอดี ':'อย่างน้อย ')+nd.n+' ตัวที่กำลังโกหก')
+        :((nd.op==='='?'exactly ':'at least ')+nd.n+' of us '+(nd.n===1?'is':'are')+' lying');
+    case 'groupCulpritCount': return th?('ใน '+listNames(c,nd.list)+' มีคนร้าย'+(nd.op==='='?'พอดี ':'อย่างน้อย ')+nd.n+' ตัว')
+        :((nd.op==='='?'exactly ':'at least ')+nd.n+' of '+listNames(c,nd.list)+' '+(nd.n===1?'is':'are')+' guilty');
+    case 'groupLiarCount': return th?('ใน '+listNames(c,nd.list)+' มีคนโกหก'+(nd.op==='='?'พอดี ':'อย่างน้อย ')+nd.n+' ตัว')
+        :((nd.op==='='?'exactly ':'at least ')+nd.n+' of '+listNames(c,nd.list)+' '+(nd.n===1?'is':'are')+' lying');
+    case 'and': return th?(clause(nd.a,c)+' และ '+clause(nd.b,c)):(clause(nd.a,c)+' and '+clause(nd.b,c));
+    case 'or':  return th?(clause(nd.a,c)+' หรือไม่ก็ '+clause(nd.b,c)):('either '+clause(nd.a,c)+' or '+clause(nd.b,c));
+    case 'if':  return th?('ถ้า'+clause(nd.a,c)+' แล้ว'+clause(nd.b,c)):('if '+clause(nd.a,c)+', then '+clause(nd.b,c));
+    case 'xor': return th?('มีเพียงข้อเดียวที่จริง: '+clause(nd.a,c)+' / '+clause(nd.b,c))
+                        :('exactly one of these is true: '+clause(nd.a,c)+' / '+clause(nd.b,c));
+    case 'not': return th?('ไม่จริงที่ว่า '+clause(nd.a,c)):('it is not true that '+clause(nd.a,c));
+  }
+  return '?';
+}
+function sentence(nd,cast,sp,lang){
+  if(nd.t==='dietDidIt') return lang==='th'?(dietWord(nd.d,lang)+'เป็นคนทำ!'):('A '+dietWord(nd.d,lang)+' did it!');
+  var s=clause(nd,{cast:cast,sp:sp,lang:lang});
+  if(lang!=='th') s=cap(s)+'.';
+  return s;
+}
+
+/* ---------- generator ---------- */
+function genAtom(rng,cast,sp,allowSelf){
+  var n=cast.length,kinds=['culprit','innocent','innocent','lie','truth','dietDidIt','noDietCulprit'];
+  var k=pick(rng,kinds),i;
+  function other(){ var x; if(n<2) return sp; do{ x=ri(rng,n); }while(x===sp); return x; }
+  if(k==='culprit'||k==='innocent'){ i=(allowSelf&&rng()<0.3)?sp:other(); return {t:k,i:i}; }
+  if(k==='lie'||k==='truth') return {t:k,i:other()};
+  if(k==='dietDidIt') return {t:'dietDidIt',d:rng()<0.6?'carn':'herb'};
+  return {t:'noDietCulprit',d:rng()<0.6?'carn':'herb'};
+}
+function same(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
+function genTier(rng,cast,sp,tier){
+  var n=cast.length,others=range(n).filter(function(x){ return x!==sp; }),a,b,lst,r;
+  if(tier===1) return genAtom(rng,cast,sp,true);
+  if(tier===2){
+    r=rng();
+    if(r<0.34){ a=genAtom(rng,cast,sp,true); b=genAtom(rng,cast,sp,false);
+      if(same(a,b)) return null; return {t:(rng()<0.55?'and':'or'),a:a,b:b}; }
+    if(r<0.54){ if(others.length<2) return null; lst=shuffle(rng,others).slice(0,2).sort(function(x,y){return x-y;});
+      return {t:'groupCulpritCount',list:lst,op:(rng()<0.5?'=':'>='),n:1}; }
+    if(r<0.72) return {t:'countLiars',op:(rng()<0.5?'=':'>='),n:1+ri(rng,Math.max(1,n-2))};
+    if(r<0.88) return {t:'allCulpritsDiet',d:(rng()<0.6?'carn':'herb')};
+    return genAtom(rng,cast,sp,true);
+  }
+  r=rng();
+  if(r<0.38){ a=genAtom(rng,cast,sp,false); b=genAtom(rng,cast,sp,true);
+    if(same(a,b)) return null; return {t:'if',a:a,b:b}; }
+  if(r<0.58){ a=genAtom(rng,cast,sp,true); b=genAtom(rng,cast,sp,false);
+    if(same(a,b)) return null; return {t:'xor',a:a,b:b}; }
+  if(r<0.76){ if(others.length<2) return null;
+    var take=2+((rng()<0.4&&others.length>2)?1:0);
+    lst=shuffle(rng,others).slice(0,take).sort(function(x,y){return x-y;});
+    return {t:'groupLiarCount',list:lst,op:(rng()<0.6?'=':'>='),n:1}; }
+  if(r<0.9){ a=genAtom(rng,cast,sp,true); b=genAtom(rng,cast,sp,false);
+    if(same(a,b)) return null; return {t:'not',a:{t:'and',a:a,b:b}}; }
+  return genTier(rng,cast,sp,2);
+}
+function genStatement(rng,cast,sp,tiers,seen){
+  var i,nd,key;
+  for(i=0;i<18;i++){
+    nd=genTier(rng,cast,sp,pick(rng,tiers));
+    if(!nd) continue;
+    key=JSON.stringify(nd);
+    if(seen.indexOf(key)>=0) continue;
+    seen.push(key); return nd;
+  }
+  return {t:'innocent',i:sp};
+}
+function pickCast(rng,n){
+  var carn=shuffle(rng,ANIMALS.filter(function(a){ return a.d==='carn'; }));
+  var herb=shuffle(rng,ANIMALS.filter(function(a){ return a.d==='herb'; }));
+  var nc=Math.max(1,Math.min(n-1,1+ri(rng,n-1)));
+  return shuffle(rng,carn.slice(0,nc).concat(herb.slice(0,n-nc)));
+}
+var DIFFS={
+  easy  :{nMin:3,nMax:4,kMin:1,kMax:1,tiers:[1]},
+  medium:{nMin:4,nMax:5,kMin:1,kMax:2,tiers:[1,1,2]},
+  hard  :{nMin:5,nMax:6,kMin:1,kMax:2,tiers:[1,2,2,3]},
+  expert:{nMin:6,nMax:7,kMin:2,kMax:3,tiers:[2,3,3]}
+};
+function dossierCfg(d){
+  if(d<=2) return {nMin:3,nMax:4,kMin:1,kMax:1,tiers:[1]};
+  if(d<=4) return {nMin:4,nMax:4,kMin:1,kMax:1,tiers:[1,1,2]};
+  if(d<=6) return {nMin:4,nMax:5,kMin:1,kMax:2,tiers:[1,2]};
+  if(d<=8) return {nMin:5,nMax:6,kMin:1,kMax:2,tiers:[1,2,2,3]};
+  if(d<=10)return {nMin:5,nMax:6,kMin:2,kMax:3,tiers:[1,2,3,3]};
+  return {nMin:6,nMax:7,kMin:2,kMax:3,tiers:[2,3,3]};
+}
+function hydrate(cs){
+  cs.cast=cs.castIds.map(function(id){ return BYID[id]||ANIMALS[0]; });
+  cs.n=cs.cast.length;
+  return cs;
+}
+function buildCase(seed,cfg,diff,label){
+  var rng=mulberry32(seed>>>0),att,n,K,cast,stmts,seen,i,res,keys,cands,t,grp;
+  for(att=0;att<300;att++){
+    n=cfg.nMin+ri(rng,cfg.nMax-cfg.nMin+1);
+    K=cfg.kMin+ri(rng,cfg.kMax-cfg.kMin+1);
+    if(K>=n) K=n-1; if(K<1) K=1;
+    cast=pickCast(rng,n);
+    stmts=[]; seen=[];
+    for(i=0;i<n;i++) stmts.push(genStatement(rng,cast,i,cfg.tiers,seen));
+    res=analyze(cast,stmts,K);
+    if(res.models.length<2) continue;
+    keys=Object.keys(res.byT).filter(function(k){ return res.byT[k].length===1; });
+    if(!keys.length) continue;
+    cands=keys.filter(function(k){ var v=parseInt(k,10); return v>0&&v<n; });
+    if(!cands.length) cands=keys;
+    t=cands[ri(rng,cands.length)];
+    grp=res.byT[t];
+    return hydrate({
+      castIds:cast.map(function(a){ return a.id; }), stmts:stmts, K:K, n:n,
+      T:grp[0].trues, L:n-grp[0].trues, diff:diff, label:label,
+      crimeIdx:ri(rng,CRIMES.length), seed:seed, target:Math.round(40+n*22+K*25),
+      sol:grp[0], models:res.models
+    });
+  }
+  return null;
+}
+function fallbackCase(label){
+  var cast=['fox','deer','bear'].map(function(id){ return BYID[id]; });
+  var stmts=[{t:'culprit',i:1},{t:'innocent',i:1},{t:'lie',i:0}];
+  var res=analyze(cast,stmts,1), g=res.byT[1][0];
+  return hydrate({castIds:['fox','deer','bear'],stmts:stmts,K:1,n:3,T:g.trues,L:3-g.trues,
+    diff:'easy',label:label||'CASE 0-0',crimeIdx:0,seed:1,target:90,sol:g,models:res.models});
+}
+function publicCase(cs){
+  return {castIds:cs.castIds,stmts:cs.stmts,K:cs.K,n:cs.n,T:cs.T,L:cs.L,diff:cs.diff,
+    label:cs.label,crimeIdx:cs.crimeIdx,seed:cs.seed,target:cs.target};
+}
+
+/* ============================================================
+   6 · STATE
+   ============================================================ */
+var SAVE='acdi_save_v2';
+var S={lang:'th',sfx:1,music:1,players:1,mode:'solo',diff:'easy',
+  progress:0,stars:{},solved:0,miss:0,best:null,score:0,name:'',avatar:'🐰'};
+var G={cs:null,marks:[],tf:[],markOwner:[],tfOwner:[],secs:0,timer:null,
+  hints:0,miss:0,hintObjs:[],mode:'open',dIdx:-1,turn:0,scored:false};
+var PCOLORS=['#ffb545','#2ed3c3','#8b7cf6','#ff6b6b','#5ee2a0'];
+var AVATARS=['🐰','🦊','🐯','🐼','🦉','🐺','🐨','🦌','🐘','🦈'];
+var Players=[];
+
+function findP(id){ var i; for(i=0;i<Players.length;i++) if(Players[i].id===id) return Players[i]; return null; }
+function myId(){ return Net.myId; }
+function localPlayersSetup(){
+  Players=[]; var i,cnt=(S.mode==='pass'?Math.max(1,S.players):1);
+  for(i=0;i<cnt;i++) Players.push({id:'L'+(i+1),name:(S.lang==='th'?('นักสืบ '+(i+1)):('Detective '+(i+1))),
+    emoji:AVATARS[i%AVATARS.length],color:PCOLORS[i%5],score:0,local:true,on:true});
+  Net.myId='L1'; G.turn=0;
+}
+function actorId(){
+  if(Net.role==='off'){ var p=Players[G.turn]; return p?p.id:'L1'; }
+  return Net.myId;
+}
+function loadSave(){
+  var raw=Store.get(SAVE); if(!raw) return;
+  try{
+    var o=JSON.parse(raw); if(!o||typeof o!=='object') return;
+    ['lang','sfx','music','players','mode','diff','progress','solved','miss','best','score','name','avatar']
+      .forEach(function(k){ if(typeof o[k]!=='undefined'&&o[k]!==null) S[k]=o[k]; });
+    if(o.stars&&typeof o.stars==='object') S.stars=o.stars;
+  }catch(e){ showError('parse-save',e); }
+}
+function persist(){ try{ Store.set(SAVE,JSON.stringify(S)); }catch(e){} }
+
+/* ============================================================
+   7 · AUDIO
+   ============================================================ */
+var Sound=(function(){
+  var ctx=null,master=null,mus=null,loop=null,drone=[],ready=false;
+  function init(){
+    if(ctx) return true;
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return false;
+    try{
+      ctx=new AC(); master=ctx.createGain(); master.gain.value=.5; master.connect(ctx.destination);
+      mus=ctx.createGain(); mus.gain.value=0; mus.connect(master); ready=true; return true;
+    }catch(e){ return false; }
+  }
+  function unlock(){ try{ if(!init()) return; if(ctx.state==='suspended') ctx.resume(); }catch(e){} }
+  function tone(f,dur,type,vol,dl){
+    try{ if(!ready||!S.sfx) return;
+      var t0=ctx.currentTime+(dl||0),o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=type||'sine'; o.frequency.setValueAtTime(f,t0);
+      g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(vol||.16,t0+.012);
+      g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+      o.connect(g); g.connect(master); o.start(t0); o.stop(t0+dur+.05);
+    }catch(e){}
+  }
+  function sfx(n){
+    if(!ready||!S.sfx) return;
+    if(n==='click') tone(460,.08,'triangle',.11);
+    else if(n==='mark') tone(320,.11,'square',.07);
+    else if(n==='good'){ tone(523.25,.45,'sine',.15,0); tone(659.25,.45,'sine',.13,.09);
+                          tone(783.99,.65,'sine',.12,.18); tone(1046.5,.8,'sine',.09,.28); }
+    else if(n==='bad'){ tone(196,.32,'sawtooth',.09,0); tone(146.83,.5,'sawtooth',.08,.12); }
+    else if(n==='hint'){ tone(880,.09,'sine',.09,0); tone(1174.66,.12,'sine',.08,.08); }
+    else if(n==='join'){ tone(587.33,.12,'triangle',.1,0); tone(880,.16,'triangle',.09,.1); }
+    else if(n==='open') tone(300,.15,'sine',.09);
+  }
+  var SC=[220,246.94,261.63,311.13,349.23,392,466.16,523.25];
+  function startMusic(){
+    if(!S.music) return; if(!init()) return; if(loop) return;
+    try{
+      mus.gain.cancelScheduledValues(ctx.currentTime);
+      mus.gain.setValueAtTime(mus.gain.value,ctx.currentTime);
+      mus.gain.linearRampToValueAtTime(.22,ctx.currentTime+2.2);
+      [55,73.42].forEach(function(f){
+        var o=ctx.createOscillator(),g=ctx.createGain(),lp=ctx.createBiquadFilter();
+        lp.type='lowpass'; lp.frequency.value=400; o.type='sine'; o.frequency.value=f; g.gain.value=.15;
+        o.connect(g); g.connect(lp); lp.connect(mus); o.start(); drone.push(o);
+      });
+      loop=setInterval(function(){
+        try{
+          if(!S.music||!ctx) return;
+          var f=SC[Math.floor(Math.random()*SC.length)],t0=ctx.currentTime;
+          var o=ctx.createOscillator(),g=ctx.createGain();
+          o.type='triangle'; o.frequency.value=f;
+          g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.06,t0+.8);
+          g.gain.exponentialRampToValueAtTime(.0001,t0+2.8);
+          o.connect(g); g.connect(mus); o.start(t0); o.stop(t0+3);
+        }catch(e){}
+      },2400);
+    }catch(e){ showError('music',e); }
+  }
+  function stopMusic(){
+    try{
+      if(loop){ clearInterval(loop); loop=null; }
+      drone.forEach(function(o){ try{o.stop();}catch(e){} }); drone=[];
+      if(mus&&ctx){ mus.gain.cancelScheduledValues(ctx.currentTime);
+        mus.gain.setValueAtTime(mus.gain.value,ctx.currentTime);
+        mus.gain.linearRampToValueAtTime(0,ctx.currentTime+.4); }
+    }catch(e){}
+  }
+  return {unlock:unlock,sfx:sfx,startMusic:startMusic,stopMusic:stopMusic};
+})();
+
+/* ============================================================
+   8 · NETWORK (P2P) — host authoritative
+   ============================================================ */
+var Net={
+  role:'off', transport:null, bc:null, room:'', myId:'L1',
+  peers:[], dc:null, pcGuest:null, pendingPC:null,
+  log:function(m){
+    var el=$('netLog'); if(!el) return;
+    var d=document.createElement('div'); d.textContent='• '+m;
+    el.appendChild(d); el.scrollTop=el.scrollHeight;
+    while(el.childNodes.length>40) el.removeChild(el.firstChild);
+  },
+  send:function(msg){
+    try{
+      msg.from=Net.myId; msg.room=Net.room;
+      if(Net.transport==='bc'&&Net.bc){ Net.bc.postMessage(msg); return; }
+      if(Net.transport==='rtc'){
+        var s=JSON.stringify(msg);
+        if(Net.role==='host'){
+          Net.peers.forEach(function(p){
+            if(p.dc&&p.dc.readyState==='open'){ try{ p.dc.send(s); }catch(e){} }
+          });
+        }else if(Net.dc&&Net.dc.readyState==='open'){ try{ Net.dc.send(s); }catch(e){} }
+      }
+    }catch(e){ showError('net-send',e); }
+  },
+  status:function(txt,cls){
+    var el=$('netStatus'); if(!el) return;
+    el.textContent=txt; el.className='chip '+(cls||'');
+    var chip=$('gNetChip');
+    if(chip){ chip.hidden=(Net.role==='off'); setText('gNetTxt',Net.role==='host'?'HOST':'GUEST'); }
+  }
+};
+
+function netOnMessage(msg){
+  guard('net-msg',function(){
+    if(!msg||typeof msg!=='object') return;
+    if(Net.transport==='bc'&&msg.room&&msg.room!==Net.room) return;
+    if(msg.from===Net.myId) return;
+
+    if(Net.role==='host'){
+      switch(msg.k){
+        case 'hello':
+          if(!findP(msg.from)){
+            Players.push({id:msg.from,name:String(msg.name||'Detective').slice(0,14),
+              emoji:msg.emoji||'🦊',color:PCOLORS[Players.length%5],score:0,local:false,on:true});
+            Net.log('JOIN '+msg.name); Sound.sfx('join');
+            toast(tr('joined').replace('{n}',msg.name));
+          }
+          hostRoster(); hostSnap(true); break;
+        case 'act': applyMark(msg.mk,msg.i,msg.from); renderMarks(); hostSnap(); break;
+        case 'reset': hostResetMarks(); break;
+        case 'hint': hostHint(msg.from); break;
+        case 'check': hostCheck(msg.from); break;
+        case 'bye':{
+          var p=findP(msg.from);
+          if(p){ p.on=false; toast(tr('leftRoom').replace('{n}',p.name)); Net.log('LEAVE '+p.name); }
+          hostRoster(); break; }
+      }
+      return;
+    }
+    if(Net.role==='guest'){
+      switch(msg.k){
+        case 'roster': Players=msg.players||[]; renderLobbyPlayers(); renderScorebar(); break;
+        case 'snap': guestSnap(msg); break;
+        case 'tick': G.secs=msg.secs; setText('gTimer',fmtTime(G.secs)); break;
+        case 'hints': G.hintObjs=msg.hints||[]; G.hints=G.hintObjs.length; renderHintList(); break;
+        case 'wrong': guestWrong(msg); break;
+        case 'result': guestResult(msg); break;
+        case 'toast': toast(msg.text||''); break;
+        case 'hostbye': toast(tr('hostLeft')); leaveRoom(); break;
+      }
+    }
+  });
+}
+
+/* ---------- host broadcasting ---------- */
+function hostRoster(){
+  if(Net.role!=='host') return;
+  Net.send({k:'roster',players:Players.map(function(p){
+    return {id:p.id,name:p.name,emoji:p.emoji,color:p.color,score:p.score,on:p.on}; })});
+  renderLobbyPlayers(); renderScorebar();
+}
+function hostSnap(force){
+  if(Net.role!=='host') return;
+  Net.send({k:'snap',
+    inGame:!!G.cs, cs:G.cs?publicCase(G.cs):null,
+    marks:G.marks, tf:G.tf, mo:G.markOwner, to:G.tfOwner,
+    secs:G.secs, miss:G.miss, mode:G.mode, dIdx:G.dIdx,
+    players:Players.map(function(p){ return {id:p.id,name:p.name,emoji:p.emoji,color:p.color,score:p.score,on:p.on}; })
+  });
+  if(force) renderScorebar();
+}
+function guestSnap(msg){
+  Players=msg.players||Players;
+  if(msg.inGame&&msg.cs){
+    var fresh=(!G.cs||G.cs.label!==msg.cs.label||G.cs.seed!==msg.cs.seed);
+    G.cs=hydrate(msg.cs);
+    G.marks=msg.marks||[]; G.tf=msg.tf||[]; G.markOwner=msg.mo||[]; G.tfOwner=msg.to||[];
+    G.secs=msg.secs||0; G.miss=msg.miss||0; G.mode=msg.mode; G.dIdx=msg.dIdx;
+    if(fresh){ G.hintObjs=[]; G.hints=0; closeModals(); }
+    renderCase(); if(!$('screen-game').classList.contains('active')) show('game');
+  }else{
+    if($('screen-game').classList.contains('active')){ show('lobby'); }
+  }
+  renderScorebar(); renderLobbyPlayers();
+}
+
+/* ---------- BroadcastChannel ---------- */
+function startBC(asHost){
+  var code=($('inRoom').value||'').trim().toUpperCase();
+  if(!code){ toast(tr('roomNeed')); return; }
+  if(typeof window.BroadcastChannel!=='function'){ toast(tr('noBC')); return; }
+  closeNet(false);
+  Net.transport='bc'; Net.room=code; Net.role=asHost?'host':'guest';
+  Net.myId=asHost?'HOST':uid();
+  try{ Net.bc=new BroadcastChannel('acdi-'+code); }
+  catch(e){ showError('broadcastchannel',e); return; }
+  Net.bc.onmessage=function(ev){ netOnMessage(ev.data); };
+  var me={id:Net.myId,name:playerName(),emoji:S.avatar,color:PCOLORS[0],score:0,local:true,on:true};
+  if(asHost){ Players=[me]; hostRoster(); Net.log('HOSTING '+code); }
+  else{ Players=[me]; Net.send({k:'hello',name:me.name,emoji:me.emoji}); Net.log('JOINING '+code); }
+  Net.status((asHost?'HOST · ':'GUEST · ')+code,'mint');
+  updateMPButtons(); renderLobbyPlayers();
+  Sound.unlock(); Sound.startMusic();
+}
+
+/* ---------- WebRTC manual signalling ---------- */
+var RTC_CFG={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'}]};
+function b64enc(o){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }catch(e){ return ''; } }
+function b64dec(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s.trim())))); }catch(e){ return null; } }
+function waitIce(pc){
+  return new Promise(function(res){
+    if(pc.iceGatheringState==='complete'){ res(); return; }
+    var done=false,to=setTimeout(function(){ if(!done){ done=true; res(); } },3000);
+    pc.addEventListener('icegatheringstatechange',function(){
+      if(pc.iceGatheringState==='complete'&&!done){ done=true; clearTimeout(to); res(); }
+    });
+  });
+}
+function hasRTC(){ return typeof window.RTCPeerConnection==='function'; }
+function rtcMakeOffer(){
+  if(!hasRTC()){ toast(tr('noRTC')); return; }
+  guard('rtc-offer',function(){
+    if(Net.role!=='host'){
+      closeNet(false); Net.transport='rtc'; Net.role='host'; Net.myId='HOST'; Net.room='RTC';
+      Players=[{id:'HOST',name:playerName(),emoji:S.avatar,color:PCOLORS[0],score:0,local:true,on:true}];
+      Net.status('HOST · RTC','mint'); renderLobbyPlayers(); updateMPButtons();
+    }
+    var pc=new RTCPeerConnection(RTC_CFG);
+    var dc=pc.createDataChannel('acdi',{ordered:true});
+    var entry={pc:pc,dc:dc,pid:null};
+    dc.onopen=function(){ Net.log('PEER OPEN'); toast(tr('connected')); Sound.sfx('join'); hostRoster(); hostSnap(true); };
+    dc.onmessage=function(ev){ try{ netOnMessage(JSON.parse(ev.data)); }catch(e){} };
+    dc.onclose=function(){ Net.log('PEER CLOSED'); };
+    pc.onconnectionstatechange=function(){ Net.log('RTC '+pc.connectionState); };
+    Net.peers.push(entry); Net.pendingPC=pc;
+    pc.createOffer().then(function(off){ return pc.setLocalDescription(off); })
+      .then(function(){ return waitIce(pc); })
+      .then(function(){ $('outOffer').value=b64enc({t:'offer',sdp:pc.localDescription}); Net.log('INVITE READY'); });
+  });
+}
+function rtcAcceptAnswer(){
+  guard('rtc-accept',function(){
+    var code=$('inAnswer').value;
+    var o=b64dec(code);
+    if(!o||o.t!=='answer'||!Net.pendingPC){ toast(tr('badCode')); return; }
+    Net.pendingPC.setRemoteDescription(new RTCSessionDescription(o.sdp))
+      .then(function(){ Net.log('ANSWER ACCEPTED'); $('inAnswer').value=''; $('outOffer').value=''; })
+      .catch(function(e){ toast(tr('badCode')); showError('rtc-answer',e); });
+  });
+}
+function rtcMakeAnswer(){
+  if(!hasRTC()){ toast(tr('noRTC')); return; }
+  guard('rtc-make-answer',function(){
+    var o=b64dec($('inOffer').value);
+    if(!o||o.t!=='offer'){ toast(tr('badCode')); return; }
+    closeNet(false);
+    Net.transport='rtc'; Net.role='guest'; Net.myId=uid(); Net.room='RTC';
+    var pc=new RTCPeerConnection(RTC_CFG);
+    Net.pcGuest=pc;
+    pc.ondatachannel=function(ev){
+      Net.dc=ev.channel;
+      Net.dc.onopen=function(){ Net.log('CONNECTED'); toast(tr('connected')); Sound.sfx('join');
+        Net.send({k:'hello',name:playerName(),emoji:S.avatar}); };
+      Net.dc.onmessage=function(e){ try{ netOnMessage(JSON.parse(e.data)); }catch(err){} };
+      Net.dc.onclose=function(){ Net.log('DISCONNECTED'); };
+    };
+    pc.onconnectionstatechange=function(){ Net.log('RTC '+pc.connectionState); };
+    Players=[{id:Net.myId,name:playerName(),emoji:S.avatar,color:PCOLORS[1],score:0,local:true,on:true}];
+    Net.status('GUEST · RTC','amb'); updateMPButtons(); renderLobbyPlayers();
+    pc.setRemoteDescription(new RTCSessionDescription(o.sdp))
+      .then(function(){ return pc.createAnswer(); })
+      .then(function(ans){ return pc.setLocalDescription(ans); })
+      .then(function(){ return waitIce(pc); })
+      .then(function(){ $('outAnswer').value=b64enc({t:'answer',sdp:pc.localDescription}); Net.log('ANSWER READY'); });
+  });
+}
+function closeNet(notify){
+  try{
+    if(notify){
+      if(Net.role==='host') Net.send({k:'hostbye'});
+      else if(Net.role==='guest') Net.send({k:'bye'});
+    }
+    if(Net.bc){ try{ Net.bc.close(); }catch(e){} Net.bc=null; }
+    Net.peers.forEach(function(p){ try{ p.dc&&p.dc.close(); }catch(e){} try{ p.pc&&p.pc.close(); }catch(e){} });
+    Net.peers=[];
+    if(Net.pcGuest){ try{ Net.pcGuest.close(); }catch(e){} Net.pcGuest=null; }
+    Net.dc=null; Net.pendingPC=null;
+  }catch(e){}
+}
+function leaveRoom(){
+  closeNet(true);
+  Net.role='off'; Net.transport=null; Net.room='';
+  localPlayersSetup();
+  Net.status('OFFLINE',''); updateMPButtons(); renderLobbyPlayers(); renderScorebar();
+}
+function playerName(){
+  var v=($('inName')&&$('inName').value||'').trim();
+  if(v) { S.name=v; persist(); return v.slice(0,14); }
+  if(S.name) return S.name;
+  return (S.lang==='th'?'นักสืบ':'Detective');
+}
+function isGuest(){ return Net.role==='guest'; }
+
+/* ============================================================
+   9 · UI CORE
+   ============================================================ */
+function show(name){
+  var a=document.querySelectorAll('.screen'),i;
+  for(i=0;i<a.length;i++) a[i].classList.remove('active');
+  var el=$('screen-'+name); if(el) el.classList.add('active');
+}
+function openModal(id){ var m=$(id); if(m){ m.classList.add('show'); Sound.sfx('open'); } }
+function closeModals(){ var a=document.querySelectorAll('.modalWrap'),i;
+  for(i=0;i<a.length;i++) a[i].classList.remove('show'); }
+var toastT=null;
+function toast(msg){
+  var el=$('toast'); if(!el||!msg) return;
+  el.textContent=msg; el.classList.add('show');
+  if(toastT) clearTimeout(toastT);
+  toastT=setTimeout(function(){ el.classList.remove('show'); },2300);
+}
+function applyLang(){
+  guard('i18n',function(){
+    var a=document.querySelectorAll('[data-i18n]'),i,k;
+    for(i=0;i<a.length;i++){ k=a[i].getAttribute('data-i18n'); if(DICT[k]) a[i].textContent=tr(k); }
+    var x=document.querySelectorAll('.lblInn'); for(i=0;i<x.length;i++) x[i].textContent=tr('innocent');
+    var y=document.querySelectorAll('.lblCul'); for(i=0;i<y.length;i++) y[i].textContent=tr('culprit');
+    document.documentElement.lang=S.lang;
+    renderRules(); renderSettings(); renderMenu(); buildCampaign();
+    if(G.cs) renderCase();
+  });
+}
+function renderMenu(){
+  setText('statSolved',S.solved);
+  setText('statBest',S.best?fmtTime(S.best):'—');
+  setText('statMiss',S.miss);
+  setText('statScore',S.score);
+  var d=document.querySelectorAll('[data-diff]'),i;
+  for(i=0;i<d.length;i++) d[i].classList.toggle('sel',d[i].getAttribute('data-diff')===S.diff);
+  setText('modeLine',S.lang==='th'
+    ? ('โหมด: '+(S.mode==='pass'?'ผลัดกันเล่น':'เดี่ยว')+' • นักสืบในเครื่อง '+S.players+' คน')
+    : ('Mode: '+(S.mode==='pass'?'Pass & Play':'Solo')+' • '+S.players+' local detective(s)'));
+  var sl=$('storeLine');
+  if(sl) sl.textContent=Store.ok()?'':tr('memOnly');
+  var st=0,k; for(k in S.stars){ if(Object.prototype.hasOwnProperty.call(S.stars,k)) st+=S.stars[k]; }
+  setText('starTotal',st);
+}
+function renderSettings(){
+  var a=document.querySelectorAll('[data-set]'),i,el,key,val;
+  for(i=0;i<a.length;i++){ el=a[i]; key=el.getAttribute('data-set'); val=el.getAttribute('data-val');
+    el.classList.toggle('on',String(S[key])===val); }
+}
+function renderRules(){
+  var box=$('rulesBody'); if(!box) return;
+  box.textContent='';
+  var th=(S.lang==='th');
+  var items=th?[
+    'มีคดีเกิดขึ้นในเมือง! ผู้ต้องสงสัยเป็นสัตว์ 3–7 ตัว แต่ละตัวให้ “คำให้การ” หนึ่งประโยค',
+    'แฟ้มคดีระบุไว้ชัดเจน: มีคนร้ายกี่ตัว คำให้การจริงกี่ข้อ และโกหกกี่ข้อ',
+    'สัตว์ที่พูดจริง คำให้การต้องเป็นจริง สัตว์ที่โกหก คำให้การต้องเป็นเท็จ — ไม่เกี่ยวกับว่าเป็นคนร้ายหรือไม่',
+    'คำให้การอ้างถึงกันได้ เช่น “หมีกำลังโกหก”, “สัตว์กินเนื้อเป็นคนทำ”, “ถ้าจิ้งจอกบริสุทธิ์ แล้วกวางเป็นคนร้าย”',
+    'ใช้ปุ่ม ✓ / ⛓ บนการ์ดเพื่อจดว่าใครบริสุทธิ์หรือเป็นคนร้าย และปุ่ม T/F เพื่อจดว่าคำให้การจริงหรือเท็จ',
+    'ทุกคดีมีคำตอบเดียวเท่านั้น — ตรวจสอบได้ด้วยตรรกะล้วน ๆ ไม่ต้องเดา',
+    'โหมด P2P: เครื่องโฮสต์รันเอนจิ้นและตัดสินทั้งหมด ผู้เล่นทุกคนแชร์กระดานเดียวกัน',
+    'คะแนนรายคน: ทำเครื่องหมายถูก +10 (คนร้าย) / +6 (บริสุทธิ์), ผิด −6 / −4, T-F ถูก +4 ผิด −3, กดตรวจแล้วถูก +20, ใช้คำใบ้ −5'
+  ]:[
+    'A crime hit the city! 3–7 animal suspects each give exactly one statement.',
+    'The case file states how many culprits exist and how many statements are true / false.',
+    'A truthful suspect\u2019s statement must be true; a liar\u2019s must be false — independent of guilt.',
+    'Statements reference each other: "Bear is lying", "A carnivore did it", "If Fox is innocent, then Deer is guilty".',
+    'Use ✓ / ⛓ on a card to mark innocent/culprit, and T/F to mark a statement true/false.',
+    'Every case has exactly ONE possible solution — pure logic, never guessing.',
+    'P2P mode: the host machine runs the whole engine and judges everything; everyone shares one board.',
+    'Per-player scoring: correct mark +10 (culprit) / +6 (innocent), wrong −6 / −4, correct T-F +4 (wrong −3), correct CHECK +20, hint −5.'
+  ];
+  var ul=document.createElement('ul'),i,li;
+  for(i=0;i<items.length;i++){ li=document.createElement('li'); li.textContent=items[i]; ul.appendChild(li); }
+  box.appendChild(ul);
+}
+
+/* ---------- campaign ---------- */
+var DOSSIERS=12,CASES_PER=5;
+function buildCampaign(){
+  var wrap=$('dossiers'); if(!wrap) return;
+  wrap.textContent='';
+  var d,c,card,h,sub,cases,btn,idx,cfg,lab,stars,sv;
+  for(d=1;d<=DOSSIERS;d++){
+    card=document.createElement('div'); card.className='dossier panel';
+    h=document.createElement('h3'); h.textContent=(S.lang==='th'?'แฟ้มที่ ':'Dossier ')+d;
+    cfg=dossierCfg(d);
+    sub=document.createElement('div'); sub.className='small';
+    sub.textContent=(S.lang==='th'
+      ?('ผู้ต้องสงสัย '+cfg.nMin+'–'+cfg.nMax+' • คนร้าย '+cfg.kMin+'–'+cfg.kMax)
+      :(cfg.nMin+'–'+cfg.nMax+' suspects • '+cfg.kMin+'–'+cfg.kMax+' culprit(s)'));
+    cases=document.createElement('div'); cases.className='cases';
+    for(c=1;c<=CASES_PER;c++){
+      idx=(d-1)*CASES_PER+(c-1);
+      btn=document.createElement('button'); btn.type='button';
+      btn.className='caseBtn'; btn.setAttribute('data-idx',String(idx));
+      lab=document.createElement('span'); lab.textContent=d+'-'+c;
+      stars=document.createElement('span'); stars.className='st';
+      sv=S.stars[idx]||0; stars.textContent=sv?'★★★'.slice(0,sv):'';
+      btn.appendChild(lab); btn.appendChild(stars);
+      if(idx>S.progress) btn.classList.add('locked');
+      if(typeof S.stars[idx]!=='undefined') btn.classList.add('done');
+      cases.appendChild(btn);
+    }
+    card.appendChild(h); card.appendChild(sub); card.appendChild(cases);
+    wrap.appendChild(card);
+  }
+}
+
+/* ---------- lobby ---------- */
+function buildAvatarSeg(){
+  var seg=$('avatarSeg'); if(!seg) return;
+  seg.textContent='';
+  AVATARS.forEach(function(a){
+    var b=document.createElement('button'); b.type='button'; b.textContent=a;
+    b.setAttribute('data-av',a); if(a===S.avatar) b.classList.add('on');
+    seg.appendChild(b);
+  });
+}
+function renderLobbyPlayers(){
+  var box=$('lobbyPlayers'); if(!box) return;
+  box.textContent='';
+  Players.forEach(function(p){
+    var r=document.createElement('div'); r.className='prow';
+    var d=document.createElement('span'); d.className='dot'; d.style.background=p.color; d.style.color=p.color;
+    var e=document.createElement('span'); e.textContent=p.emoji||'🦊';
+    var n=document.createElement('span'); n.className='pn'; n.textContent=p.name+(p.id===Net.myId?' (you)':'');
+    var s=document.createElement('span'); s.className='chip amb'; s.textContent='💎 '+p.score;
+    if(!p.on) r.style.opacity='.45';
+    r.appendChild(d); r.appendChild(e); r.appendChild(n); r.appendChild(s);
+    box.appendChild(r);
+  });
+  setText('plCount',Players.length);
+}
+function updateMPButtons(){
+  var b=$('mpStartBtn'); if(b) b.disabled=(Net.role!=='host');
+  var hb=$('rtcHostBtn'),gb=$('rtcGuestBtn');
+  if(hb) hb.classList.toggle('on',$('rtcHostPane')&&!$('rtcHostPane').hidden);
+  if(gb) gb.classList.toggle('on',$('rtcGuestPane')&&!$('rtcGuestPane').hidden);
+}
+
+/* ---------- game render ---------- */
+function diffLabel(d){
+  var m={easy:'dEasy',medium:'dMed',hard:'dHard',expert:'dExp'};
+  return DICT[m[d]]?tr(m[d]):d;
+}
+function renderCase(){
+  guard('render-case',function(){
+    var cs=G.cs; if(!cs) return;
+    $('board').setAttribute('data-n',String(cs.n));
+    setText('gCaseName',cs.label);
+    setText('gCaseSub',S.lang==='th'
+      ?('ผู้ต้องสงสัย '+cs.n+' ตัว • ระดับ '+diffLabel(cs.diff))
+      :(cs.n+' suspects • '+diffLabel(cs.diff)));
+    var cr=CRIMES[cs.crimeIdx%CRIMES.length];
+    setText('gBrief',S.lang==='th'?cr.th:cr.en);
+    setText('gK',cs.K); setText('gT',cs.T); setText('gL',cs.L);
+    setText('gMarksNeed',cs.K); setText('gTimer',fmtTime(G.secs));
+    var showPass=(Net.role==='off'&&S.mode==='pass'&&S.players>1);
+    $('passBtn').hidden=!showPass;
+    var i,a,dt;
+    for(i=0;i<7;i++){
+      var card=$('card'+i);
+      if(i>=cs.n){ card.hidden=true; continue; }
+      card.hidden=false;
+      a=cs.cast[i];
+      setText('p'+i,a.e);
+      setText('nm'+i,S.lang==='th'?a.th:a.en);
+      dt=$('dt'+i);
+      dt.textContent=tr(a.d)+' · '+(S.lang==='th'?a.job.th:a.job.en);
+      dt.className='diet '+a.d;
+      setText('st'+i,'\u201C'+sentence(cs.stmts[i],cs.cast,i,S.lang)+'\u201D');
+    }
+    renderMarks(); renderScorebar();
+  });
+}
+function renderMarks(){
+  var cs=G.cs; if(!cs) return;
+  var i,c,n=0,ow,p;
+  for(i=0;i<cs.n;i++){
+    c=$('card'+i); if(!c) continue;
+    c.classList.toggle('mark-culprit',G.marks[i]===1);
+    c.classList.toggle('mark-innocent',G.marks[i]===2);
+    var bt=c.querySelector('.tfb.t'),bf=c.querySelector('.tfb.f');
+    if(bt) bt.classList.toggle('on',G.tf[i]===1);
+    if(bf) bf.classList.toggle('on',G.tf[i]===2);
+    ow=$('ow'+i);
+    if(ow){
+      p=(G.marks[i]?findP(G.markOwner[i]):null);
+      if(p&&Players.length>1){ ow.textContent=p.emoji; ow.style.color=p.color; ow.classList.add('show'); }
+      else ow.classList.remove('show');
+    }
+    if(G.marks[i]===1) n++;
+  }
+  setText('gMarks',n);
+  var chip=$('gMarkChip'); if(chip) chip.className='chip'+(n===cs.K?' mint':'');
+}
+function renderScorebar(){
+  var bar=$('scorebar'); if(!bar) return;
+  var multi=(Players.length>1);
+  bar.hidden=!multi;
+  var i,el,p;
+  for(i=0;i<5;i++){
+    el=$('pl'+i); if(!el) continue;
+    p=Players[i];
+    if(!p){ el.hidden=true; continue; }
+    el.hidden=false;
+    el.querySelector('.dot').style.background=p.color;
+    el.querySelector('.pn').textContent=p.emoji+' '+p.name;
+    el.querySelector('.sc').textContent=p.score;
+    el.classList.toggle('turn',Net.role==='off'?(i===G.turn):(p.id===Net.myId));
+    el.classList.toggle('off',!p.on);
+  }
+}
+
+/* ============================================================
+   10 · GAMEPLAY
+   ============================================================ */
+function startCase(cs,mode,dIdx){
+  G.cs=cs; G.mode=mode; G.dIdx=(typeof dIdx==='number'?dIdx:-1);
+  G.marks=[]; G.tf=[]; G.markOwner=[]; G.tfOwner=[];
+  G.hints=0; G.miss=0; G.hintObjs=[]; G.scored=false; G.secs=0;
+  var i; for(i=0;i<cs.n;i++){ G.marks.push(0); G.tf.push(0); G.markOwner.push(null); G.tfOwner.push(null); }
+  if(G.timer) clearInterval(G.timer);
+  G.timer=setInterval(function(){
+    G.secs++; setText('gTimer',fmtTime(G.secs));
+    if(Net.role==='host'&&(G.secs%2===0)) Net.send({k:'tick',secs:G.secs});
+  },1000);
+  G.turn=0;
+  closeModals(); renderCase(); show('game');
+  if(S.music) Sound.startMusic();
+  if(Net.role==='host') hostSnap(true);
+}
+function applyMark(mk,i,pid){
+  if(!G.cs||i<0||i>=G.cs.n) return;
+  if(mk==='cul'){ G.marks[i]=(G.marks[i]===1?0:1); G.markOwner[i]=G.marks[i]?pid:null; }
+  else if(mk==='inn'){ G.marks[i]=(G.marks[i]===2?0:2); G.markOwner[i]=G.marks[i]?pid:null; }
+  else if(mk==='tfT'){ G.tf[i]=(G.tf[i]===1?0:1); G.tfOwner[i]=G.tf[i]?pid:null; }
+  else if(mk==='tfF'){ G.tf[i]=(G.tf[i]===2?0:2); G.tfOwner[i]=G.tf[i]?pid:null; }
+}
+function doMark(mk,i){
+  if(!G.cs) return;
+  Sound.sfx('mark');
+  if(isGuest()){ Net.send({k:'act',mk:mk,i:i}); return; }
+  applyMark(mk,i,actorId()); renderMarks();
+  if(Net.role==='host') hostSnap();
+}
+function hostResetMarks(){
+  if(!G.cs) return;
+  var i; for(i=0;i<G.cs.n;i++){ G.marks[i]=0; G.tf[i]=0; G.markOwner[i]=null; G.tfOwner[i]=null; }
+  renderMarks(); if(Net.role==='host') hostSnap();
+}
+function culpritMask(){
+  var m=0,i; for(i=0;i<G.cs.n;i++) if(G.marks[i]===1) m|=(1<<i); return m;
+}
+
+/* ---------- hints ---------- */
+function contradictionPair(cs){
+  var i,j,both,none;
+  for(i=0;i<cs.n;i++){
+    for(j=i+1;j<cs.n;j++){
+      both=cs.models.filter(function(m){ return ((m.tm>>i)&1)&&((m.tm>>j)&1); });
+      if(!both.length) return {i:i,j:j,kind:'bothTrue'};
+      none=cs.models.filter(function(m){ return !((m.tm>>i)&1)&&!((m.tm>>j)&1); });
+      if(!none.length) return {i:i,j:j,kind:'bothFalse'};
+    }
+  }
+  return null;
+}
+function mostReferenced(cs){
+  var cnt=[],i; for(i=0;i<cs.n;i++) cnt.push(0);
+  function walk(nd){
+    if(!nd) return;
+    if(typeof nd.i==='number') cnt[nd.i]++;
+    if(nd.list) nd.list.forEach(function(x){ cnt[x]++; });
+    if(nd.a) walk(nd.a); if(nd.b) walk(nd.b);
+  }
+  cs.stmts.forEach(walk);
+  var best=0; for(i=1;i<cs.n;i++) if(cnt[i]>cnt[best]) best=i;
+  return best;
+}
+function makeHintObj(k){
+  var cs=G.cs;
+  if(!cs||!cs.sol) return {k:9};
+  if(k===0) return {k:0,T:cs.T,L:cs.L};
+  if(k===1){ var p=contradictionPair(cs); if(p) return {k:1,kind:p.kind,i:p.i,j:p.j};
+    return {k:11,i:mostReferenced(cs)}; }
+  if(k===2){ var r=mostReferenced(cs); return {k:2,i:r,tru:((cs.sol.tm>>r)&1)===1}; }
+  if(k===3){
+    var inn=[],i; for(i=0;i<cs.n;i++) if(!((cs.sol.cm>>i)&1)) inn.push(i);
+    if(inn.length) return {k:3,i:inn[(G.secs+inn.length)%inn.length]};
+  }
+  return {k:9};
+}
+function hintText(h){
+  var cs=G.cs,th=(S.lang==='th');
+  if(!cs) return '';
+  function N(i){ return aName(cs.cast,i,S.lang); }
+  switch(h.k){
+    case 0: return th?('เริ่มจากข้อบังคับหลัก: คำให้การจริง '+h.T+' ข้อ และโกหก '+h.L+' ข้อพอดี ลองสมมติว่าใครสักตัวพูดจริง แล้วไล่ผลที่ตามมาจนครบ')
+                    :('Anchor on the constraint: exactly '+h.T+' true and '+h.L+' false statements. Assume one suspect is truthful and chase every consequence.');
+    case 1: return h.kind==='bothTrue'
+        ?(th?(N(h.i)+' กับ '+N(h.j)+' พูดจริงพร้อมกันไม่ได้ — อย่างน้อยหนึ่งตัวโกหกแน่นอน')
+             :(N(h.i)+' and '+N(h.j)+' cannot both be truthful — at least one of them is lying.'))
+        :(th?(N(h.i)+' กับ '+N(h.j)+' โกหกพร้อมกันไม่ได้ — อย่างน้อยหนึ่งตัวพูดจริง')
+             :(N(h.i)+' and '+N(h.j)+' cannot both be lying — at least one is telling the truth.'));
+    case 11: return th?('คำให้การของ '+N(h.i)+' ถูกอ้างถึงมากที่สุด ลองไขข้อนี้ก่อน')
+                      :(N(h.i)+'\u2019s statement is referenced the most — resolve it first.');
+    case 2: return th?('เบาะแสหนัก: '+N(h.i)+(h.tru?' พูดความจริง':' กำลังโกหก')+' (แต่ยังไม่บอกว่าใครเป็นคนร้าย)')
+                     :('Strong clue: '+N(h.i)+' is '+(h.tru?'telling the truth':'lying')+' — that still doesn\u2019t name the culprit.');
+    case 3: return th?('ตัดออกได้เลย: '+N(h.i)+' ไม่ใช่คนร้าย')
+                     :('You can rule out '+N(h.i)+' — not a culprit.');
+  }
+  return tr('hintNoMore');
+}
+function renderHintList(){
+  var box=$('hintList'); if(!box) return;
+  box.textContent='';
+  var i,d,b;
+  for(i=0;i<G.hintObjs.length;i++){
+    d=document.createElement('div'); d.className='hintBox';
+    b=document.createElement('b'); b.textContent='🤖 #'+(i+1)+' ';
+    d.appendChild(b); d.appendChild(document.createTextNode(hintText(G.hintObjs[i])));
+    box.appendChild(d);
+  }
+  if(!G.hintObjs.length){
+    d=document.createElement('div'); d.className='hintBox';
+    d.textContent=(S.lang==='th'?'กด “ขอคำใบ้ถัดไป” เพื่อเริ่ม':'Press "Another hint" to begin.');
+    box.appendChild(d);
+  }
+}
+function hostHint(requesterId){
+  if(!G.cs) return;
+  if(G.hintObjs.length>=4){
+    if(Net.role==='host'&&requesterId!==Net.myId) Net.send({k:'toast',text:tr('hintNoMore')});
+    toast(tr('hintNoMore')); return;
+  }
+  var h=makeHintObj(G.hintObjs.length);
+  G.hintObjs.push(h); G.hints++;
+  var p=findP(requesterId); if(p) p.score-=5;
+  Sound.sfx('hint');
+  renderHintList(); renderScorebar();
+  if(Net.role==='host'){ Net.send({k:'hints',hints:G.hintObjs}); hostRoster(); }
+}
+function requestHint(){
+  if(!G.cs) return;
+  if(isGuest()){ Net.send({k:'hint'}); renderHintList(); openModal('modal-hint'); return; }
+  if(!G.hintObjs.length) hostHint(actorId());
+  renderHintList(); openModal('modal-hint');
+}
+
+/* ---------- check ---------- */
+function hostCheck(byId){
+  var cs=G.cs; if(!cs||!cs.sol) return;
+  var mask=culpritMask();
+  if(popcount(mask)!==cs.K){
+    var msg=tr('needMarks').replace('{n}',String(cs.K));
+    toast(msg); Sound.sfx('bad');
+    if(Net.role==='host') Net.send({k:'toast',text:msg});
+    return;
+  }
+  if(mask===cs.sol.cm){ Sound.sfx('good'); finish(true,byId); return; }
+  G.miss++; S.miss++; persist(); Sound.sfx('bad');
+  var pl=findP(byId); if(pl) pl.score-=3;
+  var payload=buildWrongPayload(mask);
+  showWrong(payload);
+  if(Net.role==='host'){ Net.send({k:'wrong',payload:payload}); hostRoster(); hostSnap(); }
+}
+function buildWrongPayload(mask){
+  var cs=G.cs,ms=cs.models.filter(function(m){ return m.cm===mask; });
+  var bad=[],j,marked;
+  if(ms.length===1){
+    for(j=0;j<cs.n;j++){
+      if(G.tf[j]!==0){ marked=(G.tf[j]===1);
+        if(marked!==(((ms[0].tm>>j)&1)===1)) bad.push(j); }
+    }
+  }
+  return {mask:mask,trues:ms.map(function(m){ return m.trues; }),bad:bad,miss:G.miss,T:cs.T};
+}
+function showWrong(p){
+  var cs=G.cs,th=(S.lang==='th');
+  setText('wrongTitle',tr('wrongT'));
+  var box=$('wrongBody'); box.textContent='';
+  var names=[],i;
+  for(i=0;i<cs.n;i++) if((p.mask>>i)&1) names.push(aName(cs.cast,i,S.lang));
+  var d1=document.createElement('div'); d1.className='warnBox';
+  if(!p.trues.length){
+    d1.textContent=th?('ถ้าคนร้ายคือ '+names.join(' และ ')+' คำให้การทั้งหมดจะขัดแย้งกันเอง — ไม่มีทางแจกจริง/เท็จให้ลงตัวได้เลย')
+                     :('If '+names.join(' & ')+' were guilty, the statements contradict themselves — no consistent true/false assignment exists.');
+  }else{
+    d1.textContent=th?('ถ้าคนร้ายคือ '+names.join(' และ ')+' จะมีคำให้การจริง '+p.trues.join(' หรือ ')+' ข้อ แต่แฟ้มคดีระบุว่าต้องจริงพอดี '+p.T+' ข้อ')
+                     :('If '+names.join(' & ')+' were guilty, there would be '+p.trues.join(' or ')+' true statement(s) — but the file says exactly '+p.T+'.');
+  }
+  box.appendChild(d1);
+  if(p.bad&&p.bad.length){
+    var d2=document.createElement('div'); d2.className='hintBox';
+    d2.textContent=th?('อีกจุด: ภายใต้สมมติฐานของคุณ เครื่องหมาย T/F ของ '+p.bad.map(function(i){return aName(cs.cast,i,S.lang);}).join(', ')+' จะกลับด้าน')
+                     :('Also: under your own assumption, your T/F marks for '+p.bad.map(function(i){return aName(cs.cast,i,S.lang);}).join(', ')+' would flip.');
+    box.appendChild(d2);
+  }
+  var d3=document.createElement('div'); d3.className='small';
+  d3.textContent=th?('พลาดในคดีนี้: '+p.miss+' ครั้ง'):('Mistakes this case: '+p.miss);
+  box.appendChild(d3);
+  var rev=$('modal-wrong').querySelector('[data-act="reveal"]');
+  if(rev) rev.style.display=isGuest()?'none':'';
+  openModal('modal-wrong');
+}
+function guestWrong(msg){ if(msg.payload){ Sound.sfx('bad'); showWrong(msg.payload); } }
+
+function scoreRound(solved,byId){
+  if(G.scored) return; G.scored=true;
+  var cs=G.cs,i,p,pid,correct;
+  for(i=0;i<cs.n;i++){
+    var guilty=((cs.sol.cm>>i)&1)===1;
+    if(G.marks[i]!==0){
+      pid=G.markOwner[i]||byId; p=findP(pid);
+      if(p){
+        if(G.marks[i]===1) p.score+=(guilty?10:-6);
+        else p.score+=(guilty?-4:6);
+      }
+    }
+    if(G.tf[i]!==0){
+      pid=G.tfOwner[i]||byId; p=findP(pid);
+      correct=((G.tf[i]===1)===(((cs.sol.tm>>i)&1)===1));
+      if(p) p.score+=(correct?4:-3);
+    }
+  }
+  if(solved){
+    p=findP(byId); if(p) p.score+=20;
+    var bonus=Math.max(0,Math.round((cs.target-G.secs)/6));
+    Players.forEach(function(q){ if(q.on) q.score+=bonus; });
+  }
+  var mine=findP(Net.role==='off'?null:Net.myId);
+  var gain=0;
+  if(Net.role==='off'){ Players.forEach(function(q){ gain+=q.score; }); }
+  else if(mine) gain=mine.score;
+  S.score=Math.max(0,gain>0?S.score+ (solved?Math.round(gain/4):0) : S.score);
+  persist();
+}
+function finish(solved,byId){
+  if(G.timer){ clearInterval(G.timer); G.timer=null; }
+  var cs=G.cs; if(!cs) return;
+  var stars=0;
+  if(solved){
+    stars=3;
+    if(G.hints>0) stars--;
+    if(G.hints>=3) stars--;
+    if(G.miss>0) stars--;
+    if(G.secs>cs.target) stars--;
+    if(stars<1) stars=1; if(stars>3) stars=3;
+    S.solved++;
+    if(S.best===null||G.secs<S.best) S.best=G.secs;
+    if(G.mode==='campaign'&&G.dIdx>=0){
+      if(!S.stars[G.dIdx]||S.stars[G.dIdx]<stars) S.stars[G.dIdx]=stars;
+      if(G.dIdx>=S.progress) S.progress=Math.min(DOSSIERS*CASES_PER-1,G.dIdx+1);
+    }
+    persist();
+  }
+  scoreRound(solved,byId||actorId());
+  if(Net.role==='host'){
+    Net.send({k:'result',solved:solved,stars:stars,sol:cs.sol,models:cs.models,
+      secs:G.secs,miss:G.miss,hints:G.hints,
+      players:Players.map(function(p){ return {id:p.id,name:p.name,emoji:p.emoji,color:p.color,score:p.score,on:p.on}; })});
+  }
+  paintResult(solved,stars);
+}
+function guestResult(msg){
+  if(G.timer){ clearInterval(G.timer); G.timer=null; }
+  if(G.cs){ G.cs.sol=msg.sol; G.cs.models=msg.models||[]; }
+  G.secs=msg.secs; G.miss=msg.miss; G.hints=msg.hints;
+  Players=msg.players||Players;
+  Sound.sfx(msg.solved?'good':'bad');
+  paintResult(msg.solved,msg.stars||0);
+}
+function paintResult(solved,stars){
+  guard('result',function(){
+    var t=$('resTitle');
+    t.textContent=solved?('🏆 '+tr('solved')):('🕯️ '+tr('failed'));
+    t.style.color=solved?'#ffd98a':'#ffb0aa';
+    setText('resStars',solved?('★★★'.slice(0,stars)+'☆☆☆'.slice(0,3-stars)):'☆☆☆');
+    setText('resTime',fmtTime(G.secs)); setText('resMiss',G.miss); setText('resHints',G.hints);
+    renderRank(); renderChain();
+    closeModals(); show('result'); renderMenu(); buildCampaign();
+  });
+}
+function renderRank(){
+  var pan=$('rankPanel'),list=$('rankList');
+  if(!pan||!list) return;
+  if(Players.length<2){ pan.hidden=true; return; }
+  pan.hidden=false; list.textContent='';
+  var sorted=Players.slice().sort(function(a,b){ return b.score-a.score; });
+  sorted.forEach(function(p,i){
+    var r=document.createElement('div'); r.className='rrow'+(i===0?' first':'');
+    var pos=document.createElement('span'); pos.className='pos'; pos.textContent='#'+(i+1);
+    var av=document.createElement('span'); av.textContent=p.emoji||'🦊';
+    var nm=document.createElement('span'); nm.className='pn'; nm.textContent=p.name; nm.style.color=p.color;
+    var sc=document.createElement('span'); sc.className='sc'; sc.textContent=p.score+' 💎';
+    r.appendChild(pos); r.appendChild(av); r.appendChild(nm); r.appendChild(sc);
+    list.appendChild(r);
+  });
+}
+function factsFor(nd,cs,cul,tru,out){
+  var th=(S.lang==='th');
+  switch(nd.t){
+    case 'culprit': case 'innocent':
+      out.push(aName(cs.cast,nd.i,S.lang)+' = '+(cul[nd.i]?(th?'คนร้าย':'guilty'):(th?'บริสุทธิ์':'innocent'))); break;
+    case 'truth': case 'lie':
+      out.push(aName(cs.cast,nd.i,S.lang)+' = '+(tru[nd.i]?(th?'พูดจริง':'truthful'):(th?'โกหก':'lying'))); break;
+    case 'dietDidIt': case 'noDietCulprit': case 'allCulpritsDiet':{
+      var g=[],i;
+      for(i=0;i<cs.n;i++) if(cul[i]) g.push(aName(cs.cast,i,S.lang)+' ('+dietWord(cs.cast[i].d,S.lang)+')');
+      out.push((th?'คนร้ายจริง: ':'actual culprits: ')+g.join(', ')); break; }
+    case 'countLiars':{ var c=0,j; for(j=0;j<cs.n;j++) if(!tru[j]) c++;
+      out.push((th?'คนโกหกทั้งหมด = ':'total liars = ')+c); break; }
+    case 'groupCulpritCount':{ var k,cc=0; for(k=0;k<nd.list.length;k++) if(cul[nd.list[k]]) cc++;
+      out.push((th?'คนร้ายในกลุ่มนั้น = ':'guilty in that group = ')+cc); break; }
+    case 'groupLiarCount':{ var l,ll=0; for(l=0;l<nd.list.length;l++) if(!tru[nd.list[l]]) ll++;
+      out.push((th?'คนโกหกในกลุ่มนั้น = ':'liars in that group = ')+ll); break; }
+    case 'and': case 'or': case 'if': case 'xor':
+      factsFor(nd.a,cs,cul,tru,out); factsFor(nd.b,cs,cul,tru,out); break;
+    case 'not': factsFor(nd.a,cs,cul,tru,out); break;
+  }
+  return out;
+}
+function addStep(list,key,cls,text){
+  var row=document.createElement('div'); row.className='step';
+  var k=document.createElement('span'); k.className='k '+(cls||''); k.textContent=key;
+  var v=document.createElement('span'); v.textContent=text;
+  row.appendChild(k); row.appendChild(v); list.appendChild(row);
+}
+function renderChain(){
+  guard('chain',function(){
+    var cs=G.cs,list=$('chainList'),th=(S.lang==='th');
+    if(!list) return;
+    list.textContent='';
+    if(!cs||!cs.sol){ addStep(list,'…','',th?'ไม่มีข้อมูลเฉลย':'No solution data'); return; }
+    var cul=maskArr(cs.sol.cm,cs.n),tru=maskArr(cs.sol.tm,cs.n),i;
+    addStep(list,'①','n',th?('แฟ้มคดี: ผู้ต้องสงสัย '+cs.n+' ตัว, คนร้าย '+cs.K+' ตัว, คำจริง '+cs.T+' ข้อ, โกหก '+cs.L+' ข้อ')
+      :('Case file: '+cs.n+' suspects, '+cs.K+' culprit(s), '+cs.T+' true and '+cs.L+' false statement(s).'));
+    var culNames=[];
+    for(i=0;i<cs.n;i++) if(cul[i]) culNames.push(aName(cs.cast,i,S.lang));
+    addStep(list,'②','g',th?('คนร้ายคือ: '+culNames.join(' และ ')):('The culprit(s): '+culNames.join(' & ')));
+    for(i=0;i<cs.n;i++){
+      var facts=factsFor(cs.stmts[i],cs,cul,tru,[]);
+      var head=aName(cs.cast,i,S.lang)+' — '+(tru[i]?(th?'พูดจริง':'TRUE'):(th?'โกหก':'LIE'));
+      var body=' \u201C'+sentence(cs.stmts[i],cs.cast,i,S.lang)+'\u201D'+
+        (facts.length?((th?' เพราะ ':' because ')+facts.join('; ')):'');
+      addStep(list,tru[i]?'✓':'✗',tru[i]?'t':'f',head+':'+body);
+    }
+    var h4=document.createElement('h4');
+    h4.textContent=th?'ทำไมคำตอบอื่นเป็นไปไม่ได้':'Why no other answer works';
+    list.appendChild(h4);
+    var shown=0,m,z,nm,ms,txt;
+    for(m=0;m<(1<<cs.n)&&shown<10;m++){
+      if(popcount(m)!==cs.K||m===cs.sol.cm) continue;
+      nm=[]; for(z=0;z<cs.n;z++) if((m>>z)&1) nm.push(aName(cs.cast,z,S.lang));
+      ms=(cs.models||[]).filter(function(x){ return x.cm===m; });
+      if(!ms.length) txt=th?'ขัดแย้งในตัวเอง — แจกจริง/เท็จไม่ลงตัว':'self-contradictory — no consistent assignment';
+      else txt=th?('จะได้คำให้การจริง '+ms.map(function(x){return x.trues;}).join('/')+' ข้อ (ต้องได้ '+cs.T+')')
+                 :('would give '+ms.map(function(x){return x.trues;}).join('/')+' true statement(s), not '+cs.T);
+      addStep(list,'✗','f',(th?'ถ้า ':'If ')+nm.join(' & ')+': '+txt);
+      shown++;
+    }
+  });
+}
+
+/* ============================================================
+   11 · CASE LAUNCHERS
+   ============================================================ */
+function newOpenCase(){
+  if(isGuest()){ toast(tr('hostOnly')); return; }
+  var seed=(Date.now()^Math.floor(Math.random()*1e9))>>>0;
+  var cfg=DIFFS[S.diff]||DIFFS.easy;
+  var label=(S.lang==='th'?'คดีเปิด #':'OPEN CASE #')+String(seed%9000+1000);
+  var cs=buildCase(seed,cfg,S.diff,label)||buildCase((seed+7)>>>0,DIFFS.easy,'easy',label);
+  if(!cs){ cs=fallbackCase(label); toast(tr('genFail')); }
+  startCase(cs,'open',-1);
+}
+function startCampaignCase(idx){
+  if(isGuest()){ toast(tr('hostOnly')); return; }
+  var d=Math.floor(idx/CASES_PER)+1,c=(idx%CASES_PER)+1;
+  var cfg=dossierCfg(d);
+  var diff=d<=3?'easy':(d<=6?'medium':(d<=9?'hard':'expert'));
+  var seed=(1000003+d*7919+c*104729)>>>0;
+  var label=(S.lang==='th'?'คดี ':'CASE ')+d+'-'+c;
+  var cs=null,t=0;
+  while(!cs&&t<5){ cs=buildCase((seed+t*131)>>>0,cfg,diff,label); t++; }
+  if(!cs) cs=buildCase(seed,DIFFS.easy,'easy',label);
+  if(!cs){ cs=fallbackCase(label); toast(tr('genFail')); }
+  startCase(cs,'campaign',idx);
+}
+
+/* ============================================================
+   12 · EVENTS
+   ============================================================ */
+function bindEvents(){
+  document.addEventListener('pointerdown',function(){
+    Sound.unlock(); if(S.music) Sound.startMusic();
+  },{once:true});
+
+  var ec=$('errClose');
+  if(ec) ec.addEventListener('click',function(){ $('errorPanel').hidden=true; });
+
+  document.addEventListener('click',function(ev){
+    var t=ev.target;
+
+    var mk=closestEl(t,'[data-mk]');
+    if(mk){ doMark(mk.getAttribute('data-mk'),parseInt(mk.getAttribute('data-i'),10)); return; }
+
+    var av=closestEl(t,'[data-av]');
+    if(av){ S.avatar=av.getAttribute('data-av'); persist(); buildAvatarSeg(); Sound.sfx('click'); return; }
+
+    var trn=closestEl(t,'[data-tr]');
+    if(trn){
+      var mode=trn.getAttribute('data-tr');
+      $('paneBC').hidden=(mode!=='bc'); $('paneRTC').hidden=(mode!=='rtc');
+      var seg=trn.parentElement.querySelectorAll('button'),i;
+      for(i=0;i<seg.length;i++) seg[i].classList.toggle('on',seg[i]===trn);
+      Sound.sfx('click'); return;
+    }
+
+    var df=closestEl(t,'[data-diff]');
+    if(df){ S.diff=df.getAttribute('data-diff'); persist(); renderMenu(); Sound.sfx('click'); return; }
+
+    var st=closestEl(t,'[data-set]');
+    if(st){
+      var key=st.getAttribute('data-set'),val=st.getAttribute('data-val');
+      if(key==='lang'||key==='mode') S[key]=val; else S[key]=parseInt(val,10);
+      persist();
+      if(key==='music'){ if(S.music){ Sound.unlock(); Sound.startMusic(); } else Sound.stopMusic(); }
+      if((key==='players'||key==='mode')&&Net.role==='off'){ localPlayersSetup(); renderScorebar(); }
+      renderSettings(); applyLang(); Sound.sfx('click'); return;
+    }
+
+    var ci=closestEl(t,'.caseBtn[data-idx]');
+    if(ci){
+      if(ci.classList.contains('locked')){ toast(tr('locked')); return; }
+      Sound.sfx('click'); startCampaignCase(parseInt(ci.getAttribute('data-idx'),10)); return;
+    }
+
+    var a=closestEl(t,'[data-act]');
+    if(!a) return;
+    var act=a.getAttribute('data-act');
+    Sound.sfx('click');
+    guard('action:'+act,function(){
+      switch(act){
+        case 'campaign': buildCampaign(); show('campaign'); break;
+        case 'openCase': newOpenCase(); break;
+        case 'lobby': buildAvatarSeg(); renderLobbyPlayers(); updateMPButtons(); show('lobby'); break;
+        case 'rules': renderRules(); openModal('modal-rules'); break;
+        case 'settings': renderSettings(); openModal('modal-settings'); break;
+        case 'closeModal': closeModals(); break;
+        case 'wipe':
+          S.progress=0; S.stars={}; S.solved=0; S.miss=0; S.best=null; S.score=0; persist();
+          buildCampaign(); renderMenu(); toast(tr('wiped')); break;
+        case 'back':
+          closeModals();
+          if($('screen-game').classList.contains('active')){
+            if(G.timer){ clearInterval(G.timer); G.timer=null; }
+            if(Net.role!=='off') show('lobby');
+            else show(G.mode==='campaign'?'campaign':'menu');
+          }else show('menu');
+          renderMenu(); break;
+        case 'resetMarks':
+          if(isGuest()) Net.send({k:'reset'}); else hostResetMarks(); break;
+        case 'hint': requestHint(); break;
+        case 'nextHint':
+          if(isGuest()) Net.send({k:'hint'}); else hostHint(actorId());
+          break;
+        case 'check':
+          if(isGuest()) Net.send({k:'check'}); else hostCheck(actorId());
+          break;
+        case 'reveal': closeModals(); if(!isGuest()) finish(false,actorId()); break;
+        case 'pass':
+          if(Players.length>1){ G.turn=(G.turn+1)%Players.length; renderScorebar();
+            toast(Players[G.turn].emoji+' '+Players[G.turn].name); }
+          break;
+        case 'toMenu': show('menu'); renderMenu(); break;
+        case 'replay':
+          if(G.cs&&!isGuest()) startCase(G.cs,G.mode,G.dIdx);
+          else if(isGuest()) toast(tr('hostOnly'));
+          break;
+        case 'next':
+          if(isGuest()){ toast(tr('waitHost')); break; }
+          if(G.mode==='campaign'){
+            var nx=G.dIdx+1;
+            if(nx<DOSSIERS*CASES_PER&&nx<=S.progress) startCampaignCase(nx);
+            else { buildCampaign(); show('campaign'); }
+          }else newOpenCase();
+          break;
+        case 'hostBC': startBC(true); break;
+        case 'joinBC': startBC(false); break;
+        case 'leaveRoom': leaveRoom(); show('menu'); break;
+        case 'mpStart':
+          if(Net.role!=='host'){ toast(tr('hostOnly')); break; }
+          newOpenCase(); break;
+        case 'rtcHostMode':
+          $('rtcHostPane').hidden=false; $('rtcGuestPane').hidden=true; updateMPButtons(); break;
+        case 'rtcGuestMode':
+          $('rtcHostPane').hidden=true; $('rtcGuestPane').hidden=false; updateMPButtons(); break;
+        case 'rtcOffer': rtcMakeOffer(); break;
+        case 'rtcAccept': rtcAcceptAnswer(); break;
+        case 'rtcAnswer': rtcMakeAnswer(); break;
+        case 'copyOffer': copyField('outOffer'); break;
+        case 'copyAnswer': copyField('outAnswer'); break;
+      }
+    });
+  });
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ closeModals(); return; }
+    var modalOpen=document.querySelector('.modalWrap.show');
+    if(e.key==='Enter'&&!modalOpen&&$('screen-game').classList.contains('active')){
+      if(isGuest()) Net.send({k:'check'}); else hostCheck(actorId());
+    }
+  });
+
+  window.addEventListener('beforeunload',function(){ closeNet(true); });
+}
+function copyField(id){
+  var el=$(id); if(!el||!el.value) return;
+  try{
+    el.select(); el.setSelectionRange(0,999999);
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(el.value);
+    else document.execCommand('copy');
+    toast(tr('copied'));
+  }catch(e){ toast(tr('copied')); }
+}
+
+/* ============================================================
+   13 · ATMOSPHERE + BOOT
+   ============================================================ */
+function makeMotes(){
+  var a=$('bg'); if(!a) return;
+  var i,d;
+  for(i=0;i<24;i++){
+    d=document.createElement('div'); d.className='mote';
+    d.style.left=(Math.random()*100)+'%';
+    d.style.animationDuration=(13+Math.random()*22)+'s';
+    d.style.animationDelay=(-Math.random()*28)+'s';
+    d.style.opacity=String(.2+Math.random()*.55);
+    a.appendChild(d);
+  }
+}
+function selfTest(){
+  var cs=fallbackCase('TEST');
+  if(!cs||cs.sol.cm!==2) throw new Error('logic engine self-test failed');
+  var s=sentence(cs.stmts[0],cs.cast,0,'en');
+  if(!s||typeof s!=='string') throw new Error('renderer self-test failed');
+  var probe=buildCase(12345,DIFFS.easy,'easy','PROBE');
+  if(!probe) throw new Error('generator self-test failed');
+  var res=analyze(probe.cast,probe.stmts,probe.K);
+  var grp=res.byT[probe.T];
+  if(!grp||grp.length!==1) throw new Error('uniqueness self-test failed');
+}
+function boot(){
+  loadSave();
+  guard('self-test',selfTest);
+  guard('motes',makeMotes);
+  localPlayersSetup();
+  guard('campaign',buildCampaign);
+  guard('avatars',buildAvatarSeg);
+  guard('i18n-init',applyLang);
+  guard('events',bindEvents);
+  if($('inName')) $('inName').value=S.name||'';
+  if($('inRoom')) $('inRoom').value='ZPD'+String(Math.floor(Math.random()*900)+100);
+  var bcBtn=document.querySelector('[data-tr="bc"]'); if(bcBtn) bcBtn.classList.add('on');
+  $('rtcHostPane').hidden=false;
+  Net.status('OFFLINE','');
+  renderMenu(); renderSettings(); renderScorebar(); updateMPButtons();
+  if(!Store.ok()) toast(tr('memOnly'));
+}
+try{
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ guard('boot',boot); });
+  else guard('boot',boot);
+}catch(err){ showError('bootstrap',err); }
+})();
+</script>
+</body>
+</html>
